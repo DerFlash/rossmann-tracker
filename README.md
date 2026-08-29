@@ -4,6 +4,8 @@
 
 Filialbestände bei Rossmann prüfen, Änderungen verfolgen und auf Wunsch per Telegram benachrichtigt werden – lokal, kostenlos und inoffiziell.
 
+💬 **Community:** In der [WhatsApp-Community](https://chat.whatsapp.com/ELMb90gBK1cGDPbKX3eKZ1) könnt ihr euch zum Tracker austauschen und gegenseitig unterstützen.
+
 > [!IMPORTANT]
 > Angezeigte Werte sind Buchbestände und können vom tatsächlichen Regalbestand abweichen. Das Projekt ist unabhängig von der Dirk Rossmann GmbH und wird von ihr weder angeboten noch unterstützt.
 
@@ -67,8 +69,6 @@ Weiterführende Informationen werden versioniert im Verzeichnis [`docs/`](docs/)
 ## Projekt und Unterstützung
 
 Mehr zum inoffiziellen und nichtkommerziellen Charakter des Projekts steht auf der Seite [Über den Rossmann Store Tracker](docs/about.md). Die geplanten Schritte bis zur öffentlichen Bereitstellung sind im [Veröffentlichungsfahrplan](ROADMAP.md) festgehalten.
-
-💬 In der [WhatsApp-Community „Rossmann Store Tracker – Hilfe & Austausch“](https://chat.whatsapp.com/ELMb90gBK1cGDPbKX3eKZ1) könnt ihr euch zum Tracker austauschen und gegenseitig unterstützen.
 
 Dieses rein private Hobbyprojekt wird kostenlos und nichtkommerziell bereitgestellt. Wenn es dir hilft, kannst du meine Arbeit freiwillig über [Ko-fi](https://ko-fi.com/derflash) unterstützen. Die Unterstützung ist ein optionales persönliches Dankeschön und **keine Spende im steuer- oder gemeinnützigkeitsrechtlichen Sinn**. Sie vermittelt weder Gegenleistung noch zusätzliche Funktionen, Nutzungsrechte oder bevorzugten Support.
 
