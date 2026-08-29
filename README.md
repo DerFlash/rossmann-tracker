@@ -4,6 +4,11 @@
 
 Filialbestände bei Rossmann prüfen, Änderungen verfolgen und auf Wunsch per Telegram benachrichtigt werden – lokal, kostenlos und inoffiziell.
 
+> [!TIP]
+> **💬 WhatsApp-Community**
+>
+> Optionaler Community-Chat für Austausch und gegenseitige Hilfe zum Tracker: **[Jetzt beitreten →](https://chat.whatsapp.com/ELMb90gBK1cGDPbKX3eKZ1)**
+
 > [!IMPORTANT]
 > Angezeigte Werte sind Buchbestände und können vom tatsächlichen Regalbestand abweichen. Das Projekt ist unabhängig von der Dirk Rossmann GmbH und wird von ihr weder angeboten noch unterstützt.
 
