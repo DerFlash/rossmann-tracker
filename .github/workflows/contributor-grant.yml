@@ -1,0 +1,40 @@
+name: Contributor Grant
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  consent:
+    name: Contributor Grant
+    runs-on: ubuntu-latest
+    steps:
+      - name: Zustimmungsfeld prüfen
+        env:
+          REQUIRED_CONSENT: '- [x] **Ich stimme dem Contributor Grant in `CONTRIBUTOR_LICENSE_AGREEMENT.md` für sämtliche mit diesem Pull Request eingereichten Beiträge ausdrücklich zu.**'
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require("node:fs");
+          const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+          const pullRequest = event.pull_request;
+
+          if (pullRequest.author_association === "OWNER") {
+            console.log("Beitrag des Rechteinhabers; kein zusätzlicher Contributor Grant erforderlich.");
+            process.exit(0);
+          }
+
+          const body = (pullRequest.body || "").replace(/\r\n/g, "\n");
+          const accepted = body
+            .split("\n")
+            .some((line) => line.trim().toLowerCase() === process.env.REQUIRED_CONSENT.toLowerCase());
+
+          if (!accepted) {
+            console.error("::error::Der Contributor Grant muss im Pull-Request-Text unverändert mit [x] bestätigt werden.");
+            process.exit(1);
+          }
+
+          console.log("Contributor Grant wurde ausdrücklich bestätigt.");
+          NODE

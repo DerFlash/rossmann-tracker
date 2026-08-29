@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rossmann Store Tracker</title>
+  <style>
+    :root{color-scheme:light;--red:#cf1532;--red-dark:#a80f28;--ink:#242121;--muted:#746c69;--line:#ded5d1;--soft:#f7f4f2;--ok:#16734b;--warn:#a25b00;--error:#a9192d}
+    *{box-sizing:border-box}body{margin:0;background:#f1eeec;color:var(--ink);font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    header{position:sticky;top:0;z-index:20;background:var(--red);color:#fff;padding:15px max(24px,calc((100% - 1180px)/2));box-shadow:0 2px 14px #53101b33}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;gap:22px}.header-copy{min-width:0}.header-actions{display:flex;align-items:center;gap:12px;flex:0 0 auto}.save-state{font-size:13px;font-weight:700;opacity:.85;white-space:nowrap}
+    header h1{margin:0;font-size:clamp(22px,3vw,32px)}header p{margin:3px 0 0;opacity:.9;font-size:14px}.header-save{background:#fff;color:var(--red);min-width:128px}.header-save:hover{background:#fff4f5}.header-save:disabled{background:#ffffff33;color:#ffffffaa;border:1px solid #ffffff44;opacity:1;cursor:default}
+    main{max-width:1180px;margin:24px auto;padding:0 18px 50px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 7px 24px #4f33230b}.wide{grid-column:1/-1}
+    h2{margin:0 0 16px;font-size:21px}h3{margin:22px 0 10px;font-size:17px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    label{display:block;font-weight:650;color:#4f4845}label span{display:block;margin-bottom:6px}input,select{width:100%;border:1px solid #cfc4bf;border-radius:10px;padding:11px 12px;font:inherit;color:inherit;background:#fff}
+    input:focus,select:focus{outline:3px solid #cf153228;border-color:var(--red)}small,.hint{color:var(--muted);font-size:13px}.check{display:flex;gap:9px;align-items:center;font-weight:550}.check input{width:auto}
+    button{border:0;border-radius:11px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--red);color:#fff}button:hover{background:var(--red-dark)}button:disabled{opacity:.55;cursor:wait}
+    button.secondary{background:#fff;color:var(--ink);border:1px solid #cfc4bf}button.secondary:hover{background:var(--soft)}button.danger{background:#fff1f2;color:var(--error);padding:8px 11px}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.statusbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.result-filter{width:auto;min-width:180px}
+    .badge{display:inline-flex;align-items:center;border-radius:999px;padding:6px 11px;font-size:13px;font-weight:750;background:#ece8e6}.badge.ok{background:#e4f5ed;color:var(--ok)}.badge.error{background:#fde7ea;color:var(--error)}.badge.running,.badge.paused{background:#fff1d6;color:var(--warn)}
+    .update-card{margin:16px 0;padding:16px;border:1px solid #efc171;border-radius:13px;background:#fff8e8}.update-card h3{margin:0 0 5px}.update-card p{margin:7px 0}.update-card pre{margin:10px 0 0;padding:11px 13px;overflow:auto;border-radius:9px;background:#2a2523;color:#fff;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.update-card details{margin-top:10px}.update-card summary{cursor:pointer;font-weight:700}.update-card .security{font-weight:750;color:var(--warn)}#updateReleaseNotes{white-space:pre-wrap}
+    .notice,.dialog-notice{display:none;position:fixed;top:18px;left:50%;z-index:1000;width:min(580px,calc(100vw - 32px));transform:translateX(-50%);padding:12px 14px;border:1px solid #b9dfcd;border-radius:12px;background:#f2fbf6;color:var(--ok);font-weight:650;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 12px 38px #21171938}.notice.visible,.dialog-notice.visible{display:flex}.notice.error,.dialog-notice.error{border-color:#f0b8c0;background:#fff0f2;color:var(--error)}.notice-dismiss{padding:2px 7px;background:transparent;color:inherit;font-size:18px}.notice-dismiss:hover{background:#0000000c}
+    .rows{display:grid;gap:10px}.row{display:grid;grid-template-columns:1.6fr .75fr auto;gap:10px;align-items:end;padding:12px;background:var(--soft);border-radius:12px}.store-row,.product-row{grid-template-columns:minmax(0,1fr) auto;align-items:center}.entity-title{font-weight:750;font-size:17px}.entity-meta{color:var(--muted);font-size:13px;margin-top:3px}
+    .row label span{font-size:12px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:700px}th,td{text-align:left;padding:10px;border-bottom:1px solid #ece6e3;font-size:14px}th{color:var(--muted)}
+    .history-controls{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.5fr) minmax(130px,.6fr);gap:12px;margin-top:18px}.history-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}.history-stat{padding:12px 14px;border-radius:12px;background:var(--soft)}.history-stat span{display:block;color:var(--muted);font-size:12px;font-weight:700}.history-stat strong{display:block;margin-top:2px;font-size:19px}.history-chart{min-height:300px;margin-top:14px;border:1px solid #ece6e3;border-radius:14px;background:#fff;padding:8px}.history-chart svg{display:block;width:100%;height:auto;min-height:280px}.chart-grid{stroke:#ece6e3;stroke-width:1}.chart-axis{fill:var(--muted);font-size:12px}.chart-line{fill:none;stroke:var(--red);stroke-width:4;stroke-linejoin:round}.chart-dot{fill:#fff;stroke:var(--red);stroke-width:3}.history-empty{display:grid;min-height:280px;place-items:center;color:var(--muted);text-align:center;padding:24px}.movement-list{display:grid;gap:0}.movement-row{display:grid;grid-template-columns:minmax(0,1.5fr) auto minmax(145px,.65fr) minmax(150px,.8fr);gap:14px;align-items:center;padding:13px 12px;border-bottom:1px solid #ece6e3}.movement-row:last-child{border-bottom:0}.movement-product strong,.movement-product span{display:block}.movement-product span,.movement-stock,.movement-time,.movement-note{color:var(--muted);font-size:13px}.movement-delta{min-width:105px;border-radius:999px;padding:6px 10px;text-align:center;font-size:13px;font-weight:800}.movement-delta.in{background:#e4f5ed;color:var(--ok)}.movement-delta.out{background:#fde7ea;color:var(--error)}.movement-delta.availability{background:#fff1d6;color:var(--warn)}.movement-note{padding:12px;text-align:center}
+    .log-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.log-toolbar select{width:auto;min-width:140px}.logbox{margin-top:14px;height:330px;overflow:auto;border-radius:12px;background:#171515;color:#eae4e1;padding:13px;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Monaco,monospace}.logline{display:grid;grid-template-columns:75px 52px minmax(0,1fr);gap:9px;padding:2px 0;border-bottom:1px solid #ffffff0b}.logline .time{color:#aaa09c}.logline .level{font-weight:800}.logline.info .level{color:#8fc9ff}.logline.warn .level{color:#ffd17a}.logline.error .level{color:#ff8797}.logline .details{color:#bdb3af;overflow-wrap:anywhere}
+    dialog{width:min(680px,calc(100% - 28px));border:0;border-radius:18px;padding:0;box-shadow:0 24px 80px #24131855}dialog::backdrop{background:#21171988}.dialog-body{padding:22px}.dialog-body h2{margin-bottom:8px}.dialog-results{margin-top:16px}.dialog-results[hidden]{display:none}
+    dialog[aria-busy="true"] .dialog-body>:not(.dialog-loading){opacity:.55}.dialog-loading{display:flex;align-items:center;gap:11px;margin-top:16px;padding:13px 14px;border-radius:11px;background:#fff1d6;color:var(--warn);font-weight:700}.spinner{width:19px;height:19px;flex:0 0 auto;border:3px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .75s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+    .catalog-select-all{margin:14px 0 8px;padding:0 4px}.selection-field{border:0;padding:0;margin:16px 0 0}.selection-field legend{padding:0;margin-bottom:8px;font-weight:700;color:#4f4845}.catalog-list{display:grid;gap:8px;max-height:390px;overflow:auto;border:1px solid #cfc4bf;border-radius:12px;padding:8px;background:var(--soft)}.catalog-option{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px;border-radius:9px;background:#fff;color:var(--ink);font-weight:600}.catalog-option:hover{background:#fff8f8}.catalog-option input{width:auto;margin-top:4px}.catalog-option small{display:block;margin-top:2px}.catalog-option.disabled{opacity:.5}
+    [hidden]{display:none!important}.onboarding{max-width:760px;margin:0 auto}.setup-card{padding:clamp(22px,5vw,42px)}.setup-eyebrow{color:var(--red);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.setup-card h2{font-size:clamp(25px,4vw,34px);margin:8px 0 10px}.setup-card>p{color:var(--muted);font-size:17px}.setup-progress{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:24px 0 30px}.setup-progress span{padding:8px 10px;border-radius:999px;background:var(--soft);color:var(--muted);font-size:13px;font-weight:750;text-align:center}.setup-progress span.active{background:#fde7ea;color:var(--red)}.setup-progress span.done{background:#e4f5ed;color:var(--ok)}.setup-step ol{padding-left:22px}.setup-step li{margin:8px 0}.setup-action{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:20px}.setup-action label{flex:1 1 360px}.external-link{display:inline-flex;align-items:center;justify-content:center;border-radius:11px;padding:11px 16px;font-weight:700;text-decoration:none;background:#2586d7;color:#fff}.external-link:hover{background:#1674bd}.pairing-status{margin-top:18px;padding:15px;border-radius:12px;background:var(--soft)}.connection{padding:14px;border-radius:12px;background:#e4f5ed;color:var(--ok);margin-bottom:14px}.connection strong{display:block;font-size:17px}.bookmarklet-note{margin-top:24px;padding:14px;border-left:4px solid var(--red);background:#fff8f8;color:#5c504c}.setup-summary{margin:18px 0;padding:14px;border-radius:12px;background:#e4f5ed;color:var(--ok);font-weight:700}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.footer-note{margin-top:12px;color:var(--muted);font-size:13px}
+    @media(max-width:760px){header{padding:11px 14px}.header-inner{gap:10px}.header-copy p,.save-state{display:none}.header-save{min-width:105px;padding:10px 12px}.grid{grid-template-columns:1fr}.wide{grid-column:auto}.fields,.history-controls{grid-template-columns:1fr}.history-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.movement-row{grid-template-columns:minmax(0,1fr) auto}.movement-stock,.movement-time{grid-column:1/-1}.row,.store-row{grid-template-columns:1fr 1fr}.row button{grid-column:2}.card{padding:17px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="header-copy"><h1>Rossmann Store Tracker</h1><p>Lokale Konfiguration, Bestandsprüfung und Telegram-Benachrichtigungen</p></div>
+      <div id="headerActions" class="header-actions"><span id="saveState" class="save-state" aria-live="polite">Gespeichert</span><button id="save" class="header-save" type="button" disabled>Speichern</button></div>
+    </div>
+    <div id="notice" class="notice" role="status" aria-live="polite"><span id="noticeText"></span><button id="dismissNotice" class="notice-dismiss" type="button" aria-label="Meldung schließen">×</button></div>
+  </header>
+  <main>
+    <section id="onboarding" class="onboarding" hidden>
+      <div class="card setup-card">
+        <div class="setup-eyebrow">Ersteinrichtung</div>
+        <h2>Telegram-Wächter einrichten</h2>
+        <p>Dieser Container prüft Rossmann dauerhaft im Hintergrund und meldet Änderungen über Telegram.</p>
+        <div class="setup-progress" aria-label="Fortschritt">
+          <span id="progressTelegram">1 · Telegram</span>
+          <span id="progressLocation">2 · Filiale</span>
+          <span id="progressProduct">3 · Produkt</span>
+        </div>
+
+        <div id="setupTelegram" class="setup-step" hidden>
+          <h3>Eigenen Telegram-Bot verbinden</h3>
+          <ol>
+            <li>Öffne <strong>@BotFather</strong> in Telegram.</li>
+            <li>Sende <code>/newbot</code> und vergib einen Namen sowie einen Benutzernamen.</li>
+            <li>Kopiere den von BotFather ausgegebenen Bot-Token hierher.</li>
+          </ol>
+          <div class="actions"><a class="external-link" href="https://t.me/BotFather" target="_blank" rel="noreferrer">@BotFather öffnen</a></div>
+          <div class="setup-action">
+            <label><span>Bot-Token</span><input id="pairBotToken" type="password" autocomplete="off" placeholder="123456789:AA…"></label>
+            <button id="startPairing" type="button">Token prüfen</button>
+          </div>
+          <div id="pairingStatus" class="pairing-status" hidden>
+            <strong id="pairingBotName"></strong>
+            <p id="pairingText" class="hint"></p>
+            <div class="actions"><a id="openTelegramBot" class="external-link" href="#" target="_blank" rel="noreferrer">Bot in Telegram öffnen</a></div>
+          </div>
+          <div class="actions"><button id="cancelTelegramSetup" class="secondary" type="button" hidden>Abbrechen</button></div>
+          <div class="bookmarklet-note"><strong>Nur schnell lokal prüfen?</strong><br>Dann ist das leichtgewichtige Bookmarklet die passendere Variante. Der Docker-Tracker ist für die dauerhafte Überwachung mit Benachrichtigungen gedacht.</div>
+        </div>
+
+        <div id="setupLocation" class="setup-step" hidden>
+          <div class="setup-summary">✓ Telegram ist verbunden.</div>
+          <h3>Suchgebiet oder Filiale auswählen</h3>
+          <p class="hint">Es ist noch keine PLZ und keine Filiale gespeichert. Suche jetzt nach deinem Standort und entscheide, ob alle Treffer im Umkreis oder nur eine Filiale überwacht werden sollen.</p>
+          <div class="actions"><button id="onboardingAddStore" type="button">Filiale einrichten</button></div>
+        </div>
+
+        <div id="setupProduct" class="setup-step" hidden>
+          <div class="setup-summary">✓ Telegram und Filiale sind eingerichtet.</div>
+          <h3>Erstes Produkt auswählen</h3>
+          <p class="hint">Eine frische Installation enthält keine aktive Produktauswahl. Wähle mindestens eine DAN aus dem Katalog.</p>
+          <div class="actions"><button id="onboardingAddProduct" type="button">Produkt auswählen</button></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="dashboard" class="grid" hidden>
+      <section class="card">
+        <h2>Telegram</h2>
+        <div class="connection"><strong id="telegramBotName">Telegram verbunden</strong><span id="telegramBotMeta"></span></div>
+        <label class="check"><input id="notifyStartup" type="checkbox"> Beim Containerstart eine Nachricht senden</label>
+        <div class="actions"><button id="telegramTest" class="secondary" type="button">Telegram testen</button><button id="reconnectTelegram" class="secondary" type="button">Neu verbinden</button></div>
+      </section>
+
+      <section class="card">
+        <h2>Prüfverhalten</h2>
+        <div class="fields">
+          <label><span>Intervall in Minuten</span><input id="pollInterval" type="number" min="5" step="1"></label>
+          <label><span>Mindestpause in ms</span><input id="requestDelay" type="number" min="2000" step="100"></label>
+          <label><span>Zufällige Zusatzpause in ms</span><input id="jitter" type="number" min="500" step="100"></label>
+          <label class="check"><input id="checkOnStart" type="checkbox"> Direkt nach Start oder Ersteinrichtung prüfen</label>
+          <label class="check"><input id="updateCheckEnabled" type="checkbox"> Täglich nach stabilen Updates suchen</label>
+        </div>
+        <p class="footer-note">Das Prüfintervall beträgt mindestens 5 Minuten. Rossmann-Abfragen haben mindestens 2 Sekunden Abstand plus Zufallsverzögerung; manuelle Prüfungen sind auf eine pro Minute begrenzt. Die optionale Updateprüfung fragt höchstens einmal in 24 Stunden ausschließlich öffentliche Release-Metadaten bei GitHub ab. DANs, PLZ, Konfiguration und Installationskennung werden nicht übermittelt.</p>
+        <h3>Benachrichtigen bei</h3>
+        <div class="fields">
+          <label class="check"><input id="onRestock" type="checkbox"> Restock: 0 → Bestand</label>
+          <label class="check"><input id="onOutOfStock" type="checkbox"> Ausverkauft: Bestand → 0</label>
+          <label class="check"><input id="onStockChange" type="checkbox"> jeder Bestandsänderung</label>
+          <label class="check"><input id="onAvailabilityChange" type="checkbox"> Änderung von „geführt“</label>
+          <label class="check"><input id="notifyOnInitialStock" type="checkbox"> Ergebnis beim ersten erfolgreichen Check</label>
+          <label class="check"><input id="notifyOnManualCheck" type="checkbox"> Zusammenfassung nach manueller Prüfung</label>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="statusbar"><h2>Suchgebiete &amp; Filialen</h2><button id="addStore" class="secondary" type="button">+ Suchgebiet / Filiale</button></div>
+        <div id="searchAreas" class="rows"></div>
+        <div id="stores" class="rows"></div>
+        <p class="footer-note">Eine PLZ ist eine Umkreissuche. Standardmäßig werden alle von Rossmann zurückgegebenen Filialen überwacht; alternativ kannst du die Auswahl auf eine konkrete Filiale begrenzen.</p>
+      </section>
+
+      <section class="card wide">
+        <div class="statusbar"><h2>Produkte</h2><button id="addProduct" class="secondary" type="button">+ Produkt</button></div>
+        <div id="products" class="rows"></div>
+        <p class="footer-note">Neue Installationen starten ohne aktive Produkte. Die Auswahl erfolgt ausschließlich aus dem mitgelieferten Katalog; Einträge ohne bekannte DAN werden informativ angezeigt, können aber noch nicht überwacht werden.</p>
+      </section>
+
+      <section class="card wide">
+        <div class="statusbar">
+          <div><h2 style="margin-bottom:5px">Tracker-Status</h2><span id="runtimeBadge" class="badge">Lädt …</span></div>
+          <div class="actions" style="margin-top:0"><select id="resultFilter" class="result-filter" aria-label="Filter für Tracker-Status"><option value="available" selected>Nur verfügbare</option><option value="all">Alle Ergebnisse</option></select><button id="toggleTracking" class="secondary" type="button">Tracking pausieren</button><button id="resetBaseline" class="secondary" type="button">Ausgangsbestand zurücksetzen</button><button id="refresh" class="secondary" type="button">Aktualisieren</button><button id="checkNow" type="button">Jetzt prüfen</button></div>
+        </div>
+        <p id="runtimeText" class="hint"></p>
+        <p id="buildInfo" class="footer-note">Version wird geladen …</p>
+        <aside id="updateNotice" class="update-card" aria-live="polite" hidden>
+          <h3>Stable-Update <span id="updateVersion"></span> verfügbar</h3>
+          <p id="updateSecurity" class="security"></p>
+          <p>Die Aktualisierung erfolgt bewusst manuell. Sichere zuerst <code>data/</code> und <code>browser-data/</code>, führe dann im Installationsverzeichnis aus:</p>
+          <pre>docker compose pull
+docker compose up -d</pre>
+          <div class="actions"><a id="updateReleaseLink" class="external-link" target="_blank" rel="noreferrer">Release auf GitHub öffnen</a></div>
+          <details><summary>Release Notes</summary><p id="updateReleaseNotes"></p></details>
+        </aside>
+        <div class="table-wrap"><table><thead><tr><th>Produkt</th><th>Filiale</th><th>Bestand</th><th>geführt</th><th>geprüft</th><th>Status</th></tr></thead><tbody id="results"></tbody></table></div>
+      </section>
+
+      <section class="card wide">
+        <div class="statusbar">
+          <div><h2 style="margin-bottom:5px">Bestandsverlauf</h2><span class="hint">Bis zu 2.000 echte Änderungen je Produkt und Filiale in <code>data/state.json</code></span></div>
+          <button id="refreshHistory" class="secondary" type="button">Verlauf aktualisieren</button>
+        </div>
+        <div class="history-controls">
+          <label><span>Filiale</span><select id="historyStore" aria-label="Filiale im Bestandsverlauf"></select></label>
+          <label><span>Produkt / Ansicht</span><select id="historyProduct" aria-label="Produkt oder alle Bewegungen im Bestandsverlauf"></select></label>
+          <label><span>Zeitraum</span><select id="historyPeriod"><option value="7">7 Tage</option><option value="30" selected>30 Tage</option><option value="90">90 Tage</option><option value="all">Gesamt</option></select></label>
+        </div>
+        <div id="historyStats" class="history-stats" hidden></div>
+        <div id="historyChart" class="history-chart" aria-live="polite"><div class="history-empty">Der Verlauf wird geladen …</div></div>
+      </section>
+
+      <section class="card wide">
+        <div class="statusbar">
+          <div><h2 style="margin-bottom:5px">Protokoll</h2><span class="hint">Die letzten 500 Meldungen seit dem Containerstart</span></div>
+          <div class="log-toolbar">
+            <select id="logLevel" aria-label="Loglevel"><option value="all">Alle Level</option><option value="info">Info</option><option value="warn">Warnungen</option><option value="error">Fehler</option></select>
+            <label class="check"><input id="pauseLogs" type="checkbox"> Aktualisierung pausieren</label>
+            <button id="refreshLogs" class="secondary" type="button">Logs aktualisieren</button>
+          </div>
+        </div>
+        <div id="logbox" class="logbox" role="log" aria-live="polite"></div>
+      </section>
+
+    </div>
+    <p class="footer-note">Gespeichert wird ausschließlich lokal im Docker-Verzeichnis <code>data/</code>. Änderungen am Intervall gelten sofort; ein Container-Neustart ist nicht erforderlich.</p>
+    <dialog id="storeDialog">
+      <div class="dialog-body">
+        <h2>Suchgebiet oder Filiale hinzufügen</h2>
+        <p class="hint">Gib eine PLZ ein. Rossmann liefert dazu die Filialen im Umkreis und deren Produktbestände.</p>
+        <div class="dialog-notice" role="status"></div>
+        <label><span>Postleitzahl</span><input id="storePostcode" inputmode="numeric" maxlength="5" placeholder="01234"></label>
+        <div class="actions"><button id="searchStores" type="button">Filialen suchen</button><button id="cancelStore" class="secondary" type="button">Abbrechen</button></div>
+        <div id="storeLoading" class="dialog-loading" role="status" aria-live="polite" hidden><span class="spinner" aria-hidden="true"></span><span>Rossmann-Filialen werden gesucht. Das kann einen Moment dauern.</span></div>
+        <div id="storeResults" class="dialog-results" hidden>
+          <label><span>Überwachung</span><select id="storeMode"><option value="area">Alle Filialen im Umkreis (empfohlen)</option><option value="store">Bestimmte Filialen auswählen</option></select></label>
+          <fieldset id="specificStoreField" class="selection-field" hidden>
+            <legend>Konkrete Filialen</legend>
+            <label class="check catalog-select-all"><input id="selectAllStores" type="checkbox" aria-controls="storeSelect"> Alle angezeigten auswählen</label>
+            <div id="storeSelect" class="catalog-list" role="group" aria-label="Konkrete Filialen"></div>
+          </fieldset>
+          <div class="actions"><button id="confirmStore" type="button">Auswahl übernehmen</button></div>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="productDialog">
+      <div class="dialog-body">
+        <h2>Produkte hinzufügen</h2>
+        <p class="hint">Wähle ein oder mehrere Produkte aus dem mitgelieferten DAN-Katalog. Einträge ohne bekannte DAN können noch nicht überwacht werden.</p>
+        <div class="dialog-notice" role="status"></div>
+        <label class="check catalog-select-all"><input id="selectAllProducts" type="checkbox" aria-controls="productSelect"> Alle verfügbaren auswählen</label>
+        <div id="productSelect" class="catalog-list" role="group" aria-label="Katalogprodukte"></div>
+        <div class="actions"><button id="confirmProduct" type="button">Ausgewählte übernehmen</button><button id="cancelProduct" class="secondary" type="button">Abbrechen</button></div>
+      </div>
+    </dialog>
+  </main>
+  <script>
+    const $=id=>document.getElementById(id);
+    const notice=$('notice');
+    const noticeText=$('noticeText');
+    let settings;
+    let latestLogs=[];
+    let storeCandidates=[];
+    let productCatalog=[];
+    let historySeries=[];
+    let dirty=false;
+    let savedFingerprint=null;
+    let forceTelegramSetup=false;
+    let pairingPollTimer=null;
+    let noticeTimer=null;
+    let lastHistoryRunAt=null;
+    let historyRequest=null;
+    let historyRequestSequence=0;
+
+    async function api(url,options={}){
+      const response=await fetch(url,{...options,headers:{...(options.body?{'content-type':'application/json'}:{}),...(options.headers||{})}});
+      const data=await response.json().catch(()=>({error:`HTTP ${response.status}`}));
+      if(!response.ok) throw new Error(data.error||`HTTP ${response.status}`);
+      return data;
+    }
+    function dismissMessages(){clearTimeout(noticeTimer);noticeTimer=null;notice.className='notice';noticeText.textContent='';for(const item of document.querySelectorAll('.dialog-notice')){item.className='dialog-notice';item.textContent='';item.setAttribute('role','status')}}
+    function message(text,error=false){
+      dismissMessages();const dialogNotice=document.querySelector('dialog[open] .dialog-notice');const target=dialogNotice||notice;
+      if(dialogNotice){target.textContent=text}else{noticeText.textContent=text}
+      target.setAttribute('role',error?'alert':'status');target.className=`${dialogNotice?'dialog-notice':'notice'} visible${error?' error':''}`;
+      noticeTimer=setTimeout(dismissMessages,error?8000:4500);
+    }
+    function clearDialogNotice(dialog){const item=dialog.querySelector('.dialog-notice');if(item){item.textContent='';item.className='dialog-notice'}}
+    function input(label,value,key,type='text'){
+      const wrapper=document.createElement('label');const caption=document.createElement('span');caption.textContent=label;
+      const field=document.createElement('input');field.type=type;field.value=value||'';field.dataset.key=key;field.required=true;
+      wrapper.append(caption,field);return wrapper;
+    }
+    function setDirty(value){dirty=Boolean(value);$('save').disabled=!dirty;$('saveState').textContent=dirty?'Ungespeichert':'Gespeichert'}
+    function editableFingerprint(){const value=collectSettings();delete value.config.trackingPaused;return JSON.stringify(value)}
+    function updateDirty(){if(savedFingerprint!==null)setDirty(editableFingerprint()!==savedFingerprint)}
+    function markSaved(){savedFingerprint=editableFingerprint();setDirty(false)}
+    function removeButton(row){const button=document.createElement('button');button.type='button';button.className='danger';button.textContent='Entfernen';button.onclick=()=>{row.remove();updateDirty()};return button}
+    function addProduct(product={name:'',dan:''},markDirty=true){
+      const row=document.createElement('div');row.className='row product-row';
+      const description=document.createElement('div');const title=document.createElement('div');title.className='entity-title';title.textContent=product.name;
+      const meta=document.createElement('div');meta.className='entity-meta';meta.textContent=`DAN ${product.dan}`;description.append(title,meta);
+      for(const [key,value] of Object.entries({name:product.name,dan:product.dan})){const hidden=document.createElement('input');hidden.type='hidden';hidden.dataset.key=key;hidden.value=value;row.append(hidden)}
+      row.prepend(description);row.append(removeButton(row));$('products').append(row);if(markDirty)updateDirty();
+    }
+    function addStore(store={id:'',city:'',postcode:'',street:''},markDirty=true){
+      const row=document.createElement('div');row.className='row store-row';
+      const description=document.createElement('div');const title=document.createElement('div');title.className='entity-title';title.textContent=`${store.city} – ${store.street}`;
+      const meta=document.createElement('div');meta.className='entity-meta';meta.textContent=`${store.postcode} · Filial-ID ${store.id}`;description.append(title,meta);
+      for(const [key,value] of Object.entries(store)){const hidden=document.createElement('input');hidden.type='hidden';hidden.dataset.key=key;hidden.value=value;row.append(hidden)}
+      row.prepend(description);row.append(removeButton(row));$('stores').append(row);if(markDirty)updateDirty();
+    }
+    function addSearchArea(area={postcode:''},markDirty=true){
+      const row=document.createElement('div');row.className='row area-row';
+      const description=document.createElement('div');const title=document.createElement('div');title.className='entity-title';title.textContent=`Umkreis PLZ ${area.postcode}`;
+      const meta=document.createElement('div');meta.className='entity-meta';meta.textContent='Alle von Rossmann zurückgegebenen Filialen';description.append(title,meta);
+      const hidden=document.createElement('input');hidden.type='hidden';hidden.dataset.key='postcode';hidden.value=area.postcode;row.append(hidden);
+      row.prepend(description);row.append(removeButton(row));$('searchAreas').append(row);if(markDirty)updateDirty();
+    }
+    function collectRows(selector){return [...document.querySelectorAll(selector)].map(row=>Object.fromEntries([...row.querySelectorAll('input[data-key]')].map(field=>[field.dataset.key,field.value.trim()]))) }
+    function collectSettings(){
+      return {config:{
+        pollIntervalMinutes:Number($('pollInterval').value),requestDelayMs:Number($('requestDelay').value),jitterMs:Number($('jitter').value),
+        checkOnStart:$('checkOnStart').checked,updateCheckEnabled:$('updateCheckEnabled').checked,trackingPaused:Boolean(settings?.config?.trackingPaused),headless:false,searchAreas:collectRows('.area-row'),stores:collectRows('.store-row'),products:collectRows('.product-row'),
+        notifications:{notifyOnInitialStock:$('notifyOnInitialStock').checked,notifyOnManualCheck:$('notifyOnManualCheck').checked,onRestock:$('onRestock').checked,onOutOfStock:$('onOutOfStock').checked,onStockChange:$('onStockChange').checked,onAvailabilityChange:$('onAvailabilityChange').checked}
+      },telegram:{notifyStartup:$('notifyStartup').checked}};
+    }
+    function renderSetup(){
+      if(!settings)return;const setup=settings.setup||{};const visible=forceTelegramSetup||!setup.complete;const step=forceTelegramSetup?'telegram':setup.step;
+      $('onboarding').hidden=!visible;$('dashboard').hidden=visible;$('headerActions').hidden=visible;
+      for(const id of ['setupTelegram','setupLocation','setupProduct'])$(id).hidden=true;
+      const steps=['telegram','location','product'];const activeIndex=Math.max(0,steps.indexOf(step));
+      for(const [index,name] of steps.entries()){const item=$(`progress${name[0].toUpperCase()}${name.slice(1)}`);item.className=index<activeIndex?'done':index===activeIndex?'active':''}
+      if(visible&&step==='telegram')$('setupTelegram').hidden=false;
+      if(visible&&step==='location')$('setupLocation').hidden=false;
+      if(visible&&step==='product')$('setupProduct').hidden=false;
+      $('cancelTelegramSetup').hidden=!forceTelegramSetup||!setup.telegramConnected;
+      const telegram=settings.telegram||{};$('telegramBotName').textContent=telegram.botName||'Telegram verbunden';
+      $('telegramBotMeta').textContent=telegram.botUsername?`@${telegram.botUsername}`:`Chat ${telegram.chatId||''}`;
+    }
+    async function loadSettings(){
+      settings=await api('/api/settings');const c=settings.config,t=settings.telegram,n=c.notifications||{};productCatalog=settings.catalog||[];
+      $('pollInterval').value=c.pollIntervalMinutes;$('requestDelay').value=c.requestDelayMs;$('jitter').value=c.jitterMs;$('checkOnStart').checked=c.checkOnStart;$('updateCheckEnabled').checked=c.updateCheckEnabled!==false;
+      $('notifyStartup').checked=t.notifyStartup;
+      for(const id of ['notifyOnInitialStock','notifyOnManualCheck','onRestock','onOutOfStock','onStockChange','onAvailabilityChange']) $(id).checked=Boolean(n[id]);
+      $('searchAreas').replaceChildren();(c.searchAreas||[]).forEach(area=>addSearchArea(area,false));$('stores').replaceChildren();c.stores.forEach(store=>addStore(store,false));$('products').replaceChildren();c.products.forEach(product=>addProduct(product,false));markSaved();renderSetup();
+    }
+    function formatTime(value){return value?new Date(value).toLocaleString('de-DE'):'–'}
+    function svgElement(name,attributes={}){const element=document.createElementNS('http://www.w3.org/2000/svg',name);for(const [key,value] of Object.entries(attributes))element.setAttribute(key,String(value));return element}
+    function historyOption(value,label){const option=document.createElement('option');option.value=value;option.textContent=label;return option}
+    function historyStores(series){return[...new Map((series||[]).map(item=>[item.storeId,{value:item.storeId,label:`${item.storeName}${item.storePostcode?' ('+item.storePostcode+')':''}`}])).values()].sort((a,b)=>a.label.localeCompare(b.label,'de'))}
+    function preferredHistoryStoreId(series){const stores=historyStores(series);const previousStore=$('historyStore').value;return stores.find(store=>store.value===previousStore)?.value||stores[0]?.value||null}
+    function setHistoryOptions(data){
+      historySeries=data.series||[];const selection=data.selection;const productSelect=$('historyProduct');const storeSelect=$('historyStore');
+      const previousStore=storeSelect.value;const previousDan=productSelect.value;
+      const stores=historyStores(historySeries);
+      storeSelect.replaceChildren(...stores.map(store=>historyOption(store.value,store.label)));
+      const desiredStore=selection?.storeId||stores.find(store=>store.value===previousStore)?.value||stores[0]?.value||'';storeSelect.value=desiredStore;
+      const products=[...new Map(historySeries.filter(series=>series.storeId===desiredStore).map(series=>[series.dan,{value:series.dan,label:series.productName}])).values()].sort((a,b)=>a.label.localeCompare(b.label,'de'));
+      productSelect.replaceChildren(historyOption('','Alle Produkte – Bewegungen'),...products.map(product=>historyOption(product.value,product.label)));
+      const desiredDan=data.mode==='store'?'':selection?.dan||products.find(product=>product.value===previousDan)?.value||'';productSelect.value=desiredDan;
+      productSelect.disabled=!products.length;storeSelect.disabled=!stores.length;$('historyPeriod').disabled=!selection;$('refreshHistory').disabled=!selection;
+    }
+    function addHistoryStat(label,value){const item=document.createElement('div');item.className='history-stat';const caption=document.createElement('span');caption.textContent=label;const strong=document.createElement('strong');strong.textContent=value;item.append(caption,strong);$('historyStats').append(item)}
+    function renderStoreMovements(data,chart,stats){
+      stats.hidden=!data.selection||!data.movements.length;
+      if(!data.selection||!data.movements.length){const empty=document.createElement('div');empty.className='history-empty';empty.textContent=data.selection?'In diesem Zeitraum gab es in dieser Filiale keine echte Bestandsbewegung. Erstwerte zählen bewusst nicht als Bewegung.':'Noch keine Bestandswerte für diese Filiale vorhanden.';chart.append(empty);return}
+      addHistoryStat('Bewegungen',String(data.changes));addHistoryStat('Rein',`+${data.incomingUnits} Stk.`);addHistoryStat('Raus',`−${data.outgoingUnits} Stk.`);addHistoryStat('Produkte betroffen',String(data.productsChanged));
+      const list=document.createElement('div');list.className='movement-list';
+      for(const movement of data.movements){const row=document.createElement('div');row.className='movement-row';const product=document.createElement('div');product.className='movement-product';const name=document.createElement('strong');name.textContent=movement.productName;const dan=document.createElement('span');dan.textContent=`DAN ${movement.dan}`;product.append(name,dan);const delta=document.createElement('span');delta.className=`movement-delta ${movement.direction}`;delta.textContent=movement.delta>0?`+${movement.delta} rein`:movement.delta<0?`−${Math.abs(movement.delta)} raus`:movement.available?'wieder geführt':'nicht mehr geführt';const stock=document.createElement('span');stock.className='movement-stock';stock.textContent=`${movement.previousStock} → ${movement.stock} Stk.${movement.availabilityChanged?` · geführt: ${movement.previousAvailable?'ja':'nein'} → ${movement.available?'ja':'nein'}`:''}`;const time=document.createElement('time');time.className='movement-time';time.dateTime=movement.checkedAt;time.textContent=formatTime(movement.checkedAt);row.append(product,delta,stock,time);list.append(row)}chart.append(list);
+      if(data.truncated){const note=document.createElement('div');note.className='movement-note';note.textContent=`Angezeigt werden die neuesten ${data.movements.length} von ${data.changes} Bewegungen.`;chart.append(note)}
+    }
+    function renderHistory(data){
+      setHistoryOptions(data);const chart=$('historyChart');const stats=$('historyStats');chart.replaceChildren();stats.replaceChildren();stats.hidden=true;if(data.mode==='store'){renderStoreMovements(data,chart,stats);return}
+      stats.hidden=!data.selection||!data.points.length;
+      if(!data.selection||!data.points.length){const empty=document.createElement('div');empty.className='history-empty';empty.textContent='Noch keine Bestandswerte vorhanden. Nach dem ersten erfolgreichen Prüflauf erscheint hier der Verlauf.';chart.append(empty);return}
+      const stocks=data.points.map(point=>Number(point.stock));const latest=Number(data.selection.currentStock);addHistoryStat('Aktuell',`${latest} Stk.`);addHistoryStat('Minimum',`${Math.min(...stocks)} Stk.`);addHistoryStat('Maximum',`${Math.max(...stocks)} Stk.`);addHistoryStat('Gespeicherte Änderungen',String(data.changes));
+      const width=960,height=300,padding={top:18,right:18,bottom:42,left:52};const plotWidth=width-padding.left-padding.right,plotHeight=height-padding.top-padding.bottom;
+      const svg=svgElement('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':`Bestandsverlauf für ${data.selection.productName} in ${data.selection.storeName}`});const title=svgElement('title');title.textContent=`${data.selection.productName}: aktuell ${latest} Stück`;svg.append(title);
+      const rawStart=Math.min(...data.points.map(point=>Date.parse(point.checkedAt)));const rawEnd=Math.max(...data.points.map(point=>Date.parse(point.checkedAt)));const start=rawStart===rawEnd?rawStart-60*60*1000:rawStart;const end=rawStart===rawEnd?rawEnd+60*60*1000:rawEnd;
+      const maxStock=Math.max(1,...stocks);const niceMax=maxStock<=5?maxStock:maxStock<=20?Math.ceil(maxStock/5)*5:Math.ceil(maxStock/10)*10;const x=time=>padding.left+(Date.parse(time)-start)/(end-start)*plotWidth;const y=stock=>padding.top+(1-Number(stock)/niceMax)*plotHeight;
+      const yTicks=[...new Set([0,Math.round(niceMax/4),Math.round(niceMax/2),Math.round(niceMax*3/4),niceMax])].sort((a,b)=>a-b);for(const tick of yTicks){const line=svgElement('line',{x1:padding.left,y1:y(tick),x2:width-padding.right,y2:y(tick),class:'chart-grid'});const label=svgElement('text',{x:padding.left-10,y:y(tick)+4,'text-anchor':'end',class:'chart-axis'});label.textContent=String(tick);svg.append(line,label)}
+      const xTicks=[start,start+(end-start)/2,end];for(const tick of xTicks){const label=svgElement('text',{x:padding.left+(tick-start)/(end-start)*plotWidth,y:height-13,'text-anchor':tick===start?'start':tick===end?'end':'middle',class:'chart-axis'});label.textContent=new Date(tick).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'});svg.append(label)}
+      let path=`M ${x(data.points[0].checkedAt)} ${y(data.points[0].stock)}`;for(const point of data.points.slice(1))path+=` H ${x(point.checkedAt)} V ${y(point.stock)}`;svg.append(svgElement('path',{d:path,class:'chart-line'}));
+      for(const point of data.points.filter(point=>!point.anchor)){const circle=svgElement('circle',{cx:x(point.checkedAt),cy:y(point.stock),r:5,class:'chart-dot'});const tooltip=svgElement('title');tooltip.textContent=`${formatTime(point.checkedAt)} · ${point.stock} Stück${point.current?' · letzter Check':''}`;circle.append(tooltip);svg.append(circle)}chart.append(svg);
+    }
+    function loadHistory({dan=$('historyProduct').value,storeId=$('historyStore').value}={}){
+      const params=new URLSearchParams({period:$('historyPeriod').value||'30'});if(dan)params.set('dan',dan);if(storeId)params.set('storeId',storeId);const url=`/api/history?${params}`;
+      if(historyRequest?.url===url)return historyRequest.promise;
+      const requestId=++historyRequestSequence;const request={url,promise:null};request.promise=api(url).then(data=>{const fallbackStoreId=requestId===historyRequestSequence&&data.mode==='store'&&!data.selection?preferredHistoryStoreId(data.series):null;if(fallbackStoreId&&fallbackStoreId!==storeId)return loadHistory({dan:null,storeId:fallbackStoreId});const rendered=requestId===historyRequestSequence;if(rendered)renderHistory(data);return{data,rendered}}).finally(()=>{if(historyRequest===request)historyRequest=null});historyRequest=request;return request.promise;
+    }
+    function renderUpdate(update={}){
+      const notice=$('updateNotice');const release=update.release;
+      notice.hidden=update.state!=='available'||!release;if(notice.hidden)return;
+      $('updateVersion').textContent=release.version;$('updateSecurity').textContent=release.securityRelevant?'Sicherheitsrelevanz: Dieses Release enthält als sicherheitsrelevant gekennzeichnete Änderungen.':'Sicherheitsrelevanz: In den Release Notes ist keine besondere Sicherheitskennzeichnung enthalten.';
+      $('updateReleaseNotes').textContent=release.notes||'Für dieses Release wurden keine zusätzlichen Hinweise hinterlegt.';$('updateReleaseLink').href=release.url;
+    }
+    async function loadStatus(){
+      const data=await api('/api/status');const paused=data.configuration.trackingPaused;const ready=Boolean(data.setup?.complete);const badge=$('runtimeBadge');badge.className=`badge ${!ready?'paused':paused?'paused':data.running?'running':data.lastError?'error':'ok'}`;badge.textContent=!ready?'Einrichtung erforderlich':paused?'Tracking pausiert':data.running?'Prüfung läuft':data.lastError?'Fehler':'Bereit';
+      $('toggleTracking').textContent=data.configuration.trackingPaused?'Tracking fortsetzen':'Tracking pausieren';$('toggleTracking').disabled=!ready;$('checkNow').disabled=!ready;if(settings?.config)settings.config.trackingPaused=data.configuration.trackingPaused;
+      $('runtimeText').textContent=!ready?'Die Überwachung startet nach der vollständigen Einrichtung.':`Letzter Lauf: ${formatTime(data.lastRunFinishedAt)} · Nächster Lauf: ${formatTime(data.nextRunAt)}${data.lastError?' · '+data.lastError:''}`;
+      const build=data.build||{};const revision=build.revision&&build.revision!=='development'?` · Build ${build.revision.slice(0,12)}`:' · Entwicklungs-Build';const builtAt=build.builtAt?` · erstellt ${formatTime(build.builtAt)}`:'';$('buildInfo').textContent=`Version ${build.version||'unbekannt'} · Kanal ${build.channel==='stable'?'Stable':build.channel||'unbekannt'}${revision}${builtAt}`;renderUpdate(data.update);
+      const names=new Map(data.configuration.products.map(p=>[String(p.dan),p.name]));const stores=new Map(data.configuration.stores.map(s=>[String(s.id),`${s.city} – ${s.street}`]));
+      const body=$('results');body.replaceChildren();const visibleResults=$('resultFilter').value==='all'?data.results:data.results.filter(result=>result.status==='ok'&&Number(result.stock)>0);
+      for(const result of visibleResults){const tr=document.createElement('tr');const values=[names.get(result.dan)||result.dan,stores.get(result.storeId)||result.storeName||result.storeId,result.status==='ok'?`${result.stock} Stk.`:'–',result.status==='ok'?(result.available?'ja':'nein'):'–',formatTime(result.checkedAt),result.status==='ok'?'OK':result.error];for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td)}body.append(tr)}
+      if(!visibleResults.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=6;td.textContent=!data.results.length?(data.resultsClearedByBaselineReset?'Ausgangsbestand zurückgesetzt. Noch kein neuer Prüflauf.':'Noch kein abgeschlossener Prüflauf.'):'Keine verfügbaren Bestände. Über den Filter kannst du alle Prüfergebnisse anzeigen.';tr.append(td);body.append(tr)}
+      if(data.lastRunFinishedAt&&data.lastRunFinishedAt!==lastHistoryRunAt){void loadHistory().then(result=>{if(result.rendered)lastHistoryRunAt=data.lastRunFinishedAt}).catch(()=>{})}
+    }
+    function renderLogs(){
+      const level=$('logLevel').value;const box=$('logbox');box.replaceChildren();
+      const visible=latestLogs.filter(entry=>level==='all'||entry.level===level);
+      for(const entry of visible){const line=document.createElement('div');line.className=`logline ${entry.level}`;
+        const time=document.createElement('span');time.className='time';time.textContent=new Date(entry.timestamp).toLocaleTimeString('de-DE');
+        const logLevel=document.createElement('span');logLevel.className='level';logLevel.textContent=entry.level.toUpperCase();
+        const content=document.createElement('span');content.textContent=entry.message;
+        if(entry.details){const details=document.createElement('span');details.className='details';details.textContent=` ${JSON.stringify(entry.details)}`;content.append(details)}
+        line.append(time,logLevel,content);box.append(line)}
+      if(!visible.length){const empty=document.createElement('div');empty.textContent='Keine Logmeldungen für diesen Filter.';box.append(empty)}
+      box.scrollTop=box.scrollHeight;
+    }
+    async function loadLogs(){const data=await api('/api/logs?limit=500');latestLogs=data.logs||[];renderLogs()}
+    function fillProductCatalog(){
+      const selected=new Set([...document.querySelectorAll('.product-row input[data-key="dan"]')].map(input=>input.value));const list=$('productSelect');list.replaceChildren();
+      const labels={working:'Abruf bestätigt',request_error:'Abruf derzeit fehlerhaft',ean_only:'Nur EAN bekannt'};
+      for(const product of productCatalog){const row=document.createElement('label');row.className='catalog-option';const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=product.dan||'';checkbox.disabled=!product.dan||selected.has(product.dan);checkbox.dataset.dan=product.dan||'';
+        const text=document.createElement('span');text.textContent=product.name;const meta=document.createElement('small');meta.textContent=`${product.dan?'DAN '+product.dan:'EAN '+product.ean} · ${labels[product.status]||product.status}${selected.has(product.dan)?' · bereits ausgewählt':''}`;text.append(meta);row.append(checkbox,text);if(checkbox.disabled)row.classList.add('disabled');list.append(row)}
+      const selectAll=$('selectAllProducts');
+      const selectable=()=>[...list.querySelectorAll('input[type="checkbox"]:not(:disabled)')];
+      const update=()=>{const available=selectable();const checked=available.filter(input=>input.checked);selectAll.disabled=!available.length;selectAll.checked=available.length>0&&checked.length===available.length;selectAll.indeterminate=checked.length>0&&checked.length<available.length;$('confirmProduct').disabled=!checked.length};
+      selectAll.onchange=()=>{for(const input of selectable())input.checked=selectAll.checked;update()};list.onchange=update;update();
+    }
+    function openProductDialog(){fillProductCatalog();clearDialogNotice($('productDialog'));$('productDialog').showModal()}
+    function updateStoreSelection(){const available=[...$('storeSelect').querySelectorAll('input[type="checkbox"]:not(:disabled)')];const checked=available.filter(input=>input.checked);$('selectAllStores').disabled=!available.length;$('selectAllStores').checked=available.length>0&&checked.length===available.length;$('selectAllStores').indeterminate=checked.length>0&&checked.length<available.length;$('confirmStore').disabled=$('storeMode').value==='store'&&!checked.length}
+    function renderStoreCandidates(){const existing=new Set([...document.querySelectorAll('.store-row input[data-key="id"]')].map(input=>input.value));const list=$('storeSelect');list.replaceChildren();for(const store of storeCandidates){const row=document.createElement('label');row.className='catalog-option';const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.dataset.storeId=String(store.id);checkbox.disabled=existing.has(String(store.id));const text=document.createElement('span');text.textContent=`${store.city} – ${store.street}`;const meta=document.createElement('small');meta.textContent=`${store.postcode} · Filial-ID ${store.id}${checkbox.disabled?' · bereits ausgewählt':''}`;text.append(meta);row.append(checkbox,text);if(checkbox.disabled)row.classList.add('disabled');list.append(row)}list.onchange=updateStoreSelection;updateStoreSelection()}
+    function openStoreDialog(){$('storePostcode').value='';$('storeMode').value='area';$('specificStoreField').hidden=true;$('storeResults').hidden=true;$('storeSelect').replaceChildren();$('selectAllStores').checked=false;$('selectAllStores').indeterminate=false;storeCandidates=[];clearDialogNotice($('storeDialog'));$('storeDialog').showModal();setTimeout(()=>$('storePostcode').focus(),0)}
+    async function saveCurrentSettings(successText='Konfiguration gespeichert.'){
+      if(!dirty)return;const button=$('save');try{button.disabled=true;button.textContent='Speichert …';await api('/api/settings',{method:'PUT',body:JSON.stringify(collectSettings())});await loadSettings();await loadStatus();message(successText)}catch(e){updateDirty();message(e.message,true)}finally{button.textContent='Speichern'}
+    }
+    function renderPairing(data){
+      const visible=!['idle','cancelled'].includes(data.status);$('pairingStatus').hidden=!visible;if(!visible)return;
+      $('pairingBotName').textContent=data.bot?`${data.bot.name} (@${data.bot.username})`:'Telegram-Verbindung';
+      const texts={waiting:'Öffne jetzt den Bot und drücke in Telegram auf „Start“. Diese Seite erkennt die Verbindung automatisch.',connecting:'Telegram wurde erkannt. Die Verbindung wird gespeichert …',connected:'Telegram wurde erfolgreich verbunden.',expired:'Die Verbindung ist abgelaufen. Bitte starte sie erneut.',error:data.error||'Die Verbindung ist fehlgeschlagen.'};
+      $('pairingText').textContent=texts[data.status]||data.error||'';$('openTelegramBot').hidden=!data.telegramUrl;$('openTelegramBot').href=data.telegramUrl||'#';
+    }
+    async function refreshPairingStatus(){
+      const data=await api('/api/telegram/pairing');renderPairing(data);
+      if(data.status==='connected'){clearInterval(pairingPollTimer);pairingPollTimer=null;forceTelegramSetup=false;$('pairBotToken').value='';await loadSettings();await loadStatus();const next=settings.setup?.step;message(next==='location'?'Telegram wurde verbunden. Richte jetzt deine Filiale ein.':next==='product'?'Telegram wurde verbunden. Wähle jetzt dein erstes Produkt.':'Telegram wurde erfolgreich neu verbunden.')}
+      if(['error','expired','cancelled'].includes(data.status)){clearInterval(pairingPollTimer);pairingPollTimer=null;if(data.error)message(data.error,true)}
+      return data;
+    }
+    function startPairingPolling(){clearInterval(pairingPollTimer);pairingPollTimer=setInterval(()=>refreshPairingStatus().catch(e=>message(e.message,true)),1000)}
+    function triggerOnEnter(event,button){if(event.key!=='Enter'||event.defaultPrevented||event.isComposing||event.repeat||event.target.closest('button,a,select,input[type="checkbox"],input[type="radio"]')||!button||button.disabled)return;event.preventDefault();button.click()}
+    function setStoreLookupBusy(busy){for(const id of ['storePostcode','searchStores','cancelStore'])$(id).disabled=busy;$('storeLoading').hidden=!busy;$('searchStores').textContent=busy?'Suche läuft …':'Filialen suchen';if(busy)$('storeDialog').setAttribute('aria-busy','true');else $('storeDialog').removeAttribute('aria-busy')}
+
+    $('startPairing').onclick=async()=>{const button=$('startPairing');try{button.disabled=true;button.textContent='Prüft …';const data=await api('/api/telegram/pairing/start',{method:'POST',body:JSON.stringify({botToken:$('pairBotToken').value.trim()})});renderPairing(data);startPairingPolling();message(`Bot @${data.bot.username} erkannt. Öffne ihn jetzt in Telegram.`)}catch(e){message(e.message,true)}finally{button.disabled=false;button.textContent='Token prüfen'}};
+    $('cancelTelegramSetup').onclick=async()=>{await api('/api/telegram/pairing',{method:'DELETE'}).catch(()=>{});forceTelegramSetup=false;renderSetup()};
+    $('reconnectTelegram').onclick=()=>{forceTelegramSetup=true;$('pairBotToken').value='';renderPairing({status:'idle'});renderSetup();setTimeout(()=>$('pairBotToken').focus(),0)};
+    $('addProduct').onclick=openProductDialog;$('onboardingAddProduct').onclick=openProductDialog;
+    $('addStore').onclick=openStoreDialog;$('onboardingAddStore').onclick=openStoreDialog;
+    $('refresh').onclick=()=>Promise.all([loadStatus(),loadHistory()]).then(()=>message('Status aktualisiert.')).catch(e=>message(e.message,true));
+    $('resultFilter').onchange=()=>loadStatus().catch(e=>message(e.message,true));
+    $('cancelStore').onclick=()=>$('storeDialog').close();
+    $('storeMode').onchange=()=>{$('specificStoreField').hidden=$('storeMode').value!=='store';updateStoreSelection()};
+    $('selectAllStores').onchange=()=>{for(const input of $('storeSelect').querySelectorAll('input[type="checkbox"]:not(:disabled)'))input.checked=$('selectAllStores').checked;updateStoreSelection()};
+    $('searchStores').onclick=async()=>{try{setStoreLookupBusy(true);$('storeResults').hidden=true;storeCandidates=[];const postcode=$('storePostcode').value.trim();const data=await api('/api/stores/lookup',{method:'POST',body:JSON.stringify({postcode})});storeCandidates=data.stores||[];renderStoreCandidates();$('storeMode').options[0].textContent=`Alle ${storeCandidates.length} Filialen im Umkreis (empfohlen)`;$('storeResults').hidden=!storeCandidates.length;if(!storeCandidates.length)message('Keine Filialen gefunden.',true)}catch(e){message(e.message,true)}finally{setStoreLookupBusy(false)}};
+    $('confirmStore').onclick=async()=>{const onboardingActive=!$('onboarding').hidden;const postcode=$('storePostcode').value.trim();let successText;if($('storeMode').value==='area'){const exists=[...document.querySelectorAll('.area-row input[data-key="postcode"]')].some(input=>input.value===postcode);if(exists){message('Dieses PLZ-Suchgebiet ist bereits eingetragen.',true);return}const coveredIds=new Set(storeCandidates.map(store=>store.id));for(const row of [...document.querySelectorAll('.store-row')]){const id=row.querySelector('input[data-key="id"]')?.value;if(coveredIds.has(id))row.remove()}addSearchArea({postcode});successText=`PLZ ${postcode} überwacht künftig alle Filialen im Umkreis.`}else{const ids=new Set([...$('storeSelect').querySelectorAll('input[type="checkbox"]:checked')].map(input=>input.dataset.storeId));const stores=storeCandidates.filter(candidate=>ids.has(String(candidate.id)));if(!stores.length)return;for(const store of stores)addStore(store);successText=stores.length===1?'Eine konkrete Filiale hinzugefügt.':`${stores.length} konkrete Filialen hinzugefügt.`}$('storeDialog').close();if(onboardingActive)await saveCurrentSettings(`${successText} Wähle jetzt dein erstes Produkt.`);else message(`${successText} Zum Aktivieren noch speichern.`)};
+    $('cancelProduct').onclick=()=>$('productDialog').close();
+    $('confirmProduct').onclick=async()=>{const onboardingActive=!$('onboarding').hidden;const dans=[...$('productSelect').querySelectorAll('input[type="checkbox"]:checked')].map(input=>input.dataset.dan);const products=dans.map(dan=>productCatalog.find(candidate=>candidate.dan===dan)).filter(Boolean);if(!products.length)return;for(const product of products)addProduct(product);$('productDialog').close();const text=`${products.length} Produkt${products.length===1?'':'e'} zur Auswahl hinzugefügt.`;if(onboardingActive)await saveCurrentSettings(`${text} Die Überwachung ist jetzt eingerichtet.`);else message(`${text} Zum Aktivieren noch speichern.`)};
+    $('save').onclick=()=>saveCurrentSettings();
+    $('telegramTest').onclick=async()=>{try{const button=$('telegramTest');button.disabled=true;await api('/api/telegram/test',{method:'POST'});message('Telegram-Testnachricht wurde gesendet.')}catch(e){message(e.message,true)}finally{$('telegramTest').disabled=false}};
+    $('toggleTracking').onclick=async()=>{try{const paused=!Boolean(settings?.config?.trackingPaused);await api('/api/tracking/pause',{method:'POST',body:JSON.stringify({paused})});settings.config.trackingPaused=paused;await loadStatus();message(paused?'Tracking pausiert.':'Tracking fortgesetzt.')}catch(e){message(e.message,true)}};
+    $('resetBaseline').onclick=async()=>{if(!confirm('Alle gespeicherten Ausgangsbestände zurücksetzen? Der Bestandsverlauf bleibt erhalten. Der nächste erfolgreiche Check gilt danach wieder als erster.'))return;try{const button=$('resetBaseline');button.disabled=true;const result=await api('/api/state/reset',{method:'POST',body:JSON.stringify({})});await Promise.all([loadStatus(),loadHistory()]);message(`${result.removed} gespeicherte Ausgangswerte zurückgesetzt.`)}catch(e){message(e.message,true)}finally{$('resetBaseline').disabled=false}};
+    $('checkNow').onclick=async()=>{try{await api('/api/check',{method:'POST'});message('Bestandsprüfung wurde gestartet.');setTimeout(loadStatus,1000)}catch(e){message(e.message,true)}};
+    $('storeDialog').addEventListener('keydown',event=>triggerOnEnter(event,event.target===$('storePostcode')||$('storeResults').hidden?$('searchStores'):$('confirmStore')));
+    $('pairBotToken').addEventListener('keydown',event=>triggerOnEnter(event,$('startPairing')));
+    const configInputs=['notifyStartup','pollInterval','requestDelay','jitter','checkOnStart','updateCheckEnabled','notifyOnInitialStock','notifyOnManualCheck','onRestock','onOutOfStock','onStockChange','onAvailabilityChange'];
+    for(const id of configInputs){$(id).addEventListener('input',updateDirty);$(id).addEventListener('change',updateDirty)}
+    window.addEventListener('beforeunload',event=>{if(!dirty)return;event.preventDefault();event.returnValue='' });
+    $('dismissNotice').onclick=dismissMessages;
+    $('historyProduct').onchange=()=>loadHistory({dan:$('historyProduct').value||null,storeId:$('historyStore').value}).catch(e=>message(e.message,true));$('historyStore').onchange=()=>loadHistory({dan:null,storeId:$('historyStore').value}).catch(e=>message(e.message,true));$('historyPeriod').onchange=()=>loadHistory().catch(e=>message(e.message,true));$('refreshHistory').onclick=()=>loadHistory().then(()=>message('Bestandsverlauf aktualisiert.')).catch(e=>message(e.message,true));
+    $('refreshLogs').onclick=()=>loadLogs().then(()=>message('Protokoll aktualisiert.')).catch(e=>message(e.message,true));$('logLevel').onchange=renderLogs;
+    Promise.all([loadSettings(),loadStatus(),loadHistory(),loadLogs()]).then(()=>{if(!settings.setup?.telegramConnected)refreshPairingStatus().then(data=>{if(['waiting','connecting'].includes(data.status))startPairingPolling()}).catch(()=>{})}).catch(e=>message(e.message,true));setInterval(()=>loadStatus().catch(()=>{}),10000);setInterval(()=>{if(!$('pauseLogs').checked)loadLogs().catch(()=>{})},4000);
+  </script>
+</body>
+</html>

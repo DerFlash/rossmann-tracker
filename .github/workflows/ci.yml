@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests und Veröffentlichungshygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tracker/package-lock.json
+
+      - name: Abhängigkeiten installieren
+        working-directory: tracker
+        run: npm ci --ignore-scripts
+
+      - name: Tests ausführen
+        working-directory: tracker
+        run: npm test
+
+      - name: Dockerfile prüfen
+        run: docker build --check .
+
+      - name: Veröffentlichungshygiene prüfen
+        run: node scripts/check-publication-hygiene.mjs
+
+  container:
+    name: Multi-Arch-Container bauen
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: QEMU für ARM64 einrichten
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
+        with:
+          platforms: arm64
+
+      - name: Docker Buildx einrichten
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
+
+      - name: Container für AMD64 und ARM64 bauen
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          pull: true
+          outputs: type=cacheonly
+          cache-from: type=gha,scope=multi-arch-ci
+          cache-to: type=gha,mode=max,scope=multi-arch-ci
+
+  runtime-smoke:
+    name: Gehärteten Container starten und sichern
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ROSSMANN_TRACKER_IMAGE: rossmann-store-tracker:ci
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Lokales Testimage bauen
+        run: docker build --tag "$ROSSMANN_TRACKER_IMAGE" .
+
+      - name: Tracker mit Release-Compose starten
+        run: docker compose --file release/docker-compose.yml up --detach tracker
+
+      - name: Healthcheck abwarten
+        run: |
+          for attempt in {1..60}; do
+            status="$(docker inspect --format '{{.State.Health.Status}}' rossmann-store-tracker)"
+            if [[ "$status" == "healthy" ]]; then
+              curl --fail --silent --show-error http://127.0.0.1:8787/api/health >/dev/null
+              exit 0
+            fi
+            if [[ "$status" == "unhealthy" ]]; then
+              docker compose --file release/docker-compose.yml logs tracker
+              exit 1
+            fi
+            sleep 2
+          done
+          docker compose --file release/docker-compose.yml logs tracker
+          exit 1
+
+      - name: Gestoppten Laufzeitstand sichern
+        run: |
+          docker compose --file release/docker-compose.yml stop tracker
+          docker compose --file release/docker-compose.yml run --rm backup
+          docker compose --file release/docker-compose.yml run --rm --entrypoint node backup \
+            --input-type=module --eval \
+            "import { readdir } from 'node:fs/promises'; const entries = await readdir('/app/backups', { recursive: true }); process.exit(entries.some(entry => entry.endsWith('manifest.json')) ? 0 : 1);"
+
+      - name: Diagnose und Aufräumen
+        if: always()
+        run: |
+          docker compose --file release/docker-compose.yml ps --all
+          docker compose --file release/docker-compose.yml logs tracker
+          docker compose --file release/docker-compose.yml down

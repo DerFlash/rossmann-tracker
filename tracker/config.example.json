@@ -1,0 +1,20 @@
+{
+  "pollIntervalMinutes": 15,
+  "requestDelayMs": 2000,
+  "jitterMs": 2500,
+  "checkOnStart": true,
+  "updateCheckEnabled": true,
+  "trackingPaused": false,
+  "headless": false,
+  "searchAreas": [],
+  "stores": [],
+  "products": [],
+  "notifications": {
+    "notifyOnInitialStock": false,
+    "notifyOnManualCheck": true,
+    "onRestock": true,
+    "onOutOfStock": true,
+    "onStockChange": true,
+    "onAvailabilityChange": false
+  }
+}
