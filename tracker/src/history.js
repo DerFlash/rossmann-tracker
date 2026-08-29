@@ -278,6 +278,6 @@ export function getHistoryView(state, { dan = null, storeId = null, period = "30
     selection: seriesSummary(selected.series, selected.current),
     points,
     movements: [],
-    changes: Math.max(0, selected.series.points.length - 1),
+    changes: [...seriesMovements(selected.series, days, now)].length,
   };
 }

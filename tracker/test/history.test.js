@@ -205,3 +205,27 @@ test("Filialansicht hält nur die neuesten 500 Bewegungen im Speicher", () => {
   assert.equal(view.movements[0].checkedAt, points.at(-1).checkedAt);
   assert.equal(view.movements.at(-1).checkedAt, points[102].checkedAt);
 });
+
+test("Serienansicht zählt nur Änderungen im gewählten Zeitraum", () => {
+  const state = normalizeState({
+    history: {
+      "1001:228940": {
+        storeId: "1001", storeName: "Musterstadt", dan: "228940", productName: "Pin-Kollektion",
+        points: [
+          { stock: 0, available: false, checkedAt: "2026-06-01T08:00:00.000Z" },
+          { stock: 5, available: true, checkedAt: "2026-07-01T08:00:00.000Z" },
+          { stock: 2, available: true, checkedAt: "2026-08-25T08:00:00.000Z" },
+        ],
+      },
+    },
+  });
+
+  const view = getHistoryView(state, {
+    period: "30",
+    now: new Date("2026-08-27T08:00:00.000Z"),
+  });
+
+  assert.equal(view.changes, 1);
+  assert.deepEqual(view.points.map(({ stock }) => stock), [5, 2]);
+  assert.equal(view.points[0].anchor, true);
+});

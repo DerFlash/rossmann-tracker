@@ -1,6 +1,9 @@
 function throwIfAborted(signal) {
   if (!signal?.aborted) return;
-  throw signal.reason instanceof Error ? signal.reason : new DOMException("aborted", "AbortError");
+  if (signal.reason instanceof Error) throw signal.reason;
+  const error = new Error(String(signal.reason ?? "Vorgang abgebrochen"));
+  error.name = "AbortError";
+  throw error;
 }
 
 export async function applyTelegramPairing({ bot, nextOffset, saveOffset, commitCredentials, signal = null }) {

@@ -57,10 +57,8 @@ export function createTelegramPairingManager({
     if (["waiting", "connecting"].includes(session?.status)) session = { ...session, status: "cancelled" };
   }
 
-  async function poll(pairingId, token, nonce, initialOffset) {
+  async function poll(pairingId, token, nonce, initialOffset, localController) {
     let offset = initialOffset;
-    const localController = new AbortController();
-    controller = localController;
     try {
       while (session?.id === pairingId && session.status === "waiting") {
         if (now() >= session.expiresAtMs) {
@@ -124,48 +122,60 @@ export function createTelegramPairingManager({
     if (!token) throw new Error("Bitte füge den Bot-Token von @BotFather ein.");
     cancel();
     const startGeneration = generation;
-    await pairingTransitionQueue;
+    const validationController = new AbortController();
+    controller = validationController;
     const assertCurrent = () => {
-      if (generation !== startGeneration) throw new Error("Diese Telegram-Kopplung wurde durch einen neueren Vorgang ersetzt.");
+      if (generation !== startGeneration || validationController.signal.aborted) {
+        throw validationController.signal.reason instanceof Error
+          ? validationController.signal.reason
+          : new DOMException("Diese Telegram-Kopplung wurde durch einen neueren Vorgang ersetzt.", "AbortError");
+      }
     };
-    assertCurrent();
 
-    const me = await telegramApi(token, "getMe");
-    assertCurrent();
-    if (!me?.is_bot || !me?.username) throw new Error("Der Token gehört nicht zu einem verwendbaren Telegram-Bot.");
-    const webhook = await telegramApi(token, "getWebhookInfo");
-    assertCurrent();
-    if (webhook?.url) {
-      throw new Error("Für diesen Bot ist bereits ein Webhook eingerichtet. Bitte verwende einen neuen Bot oder entferne den Webhook zuerst.");
+    try {
+      await pairingTransitionQueue;
+      assertCurrent();
+
+      const me = await telegramApi(token, "getMe", {}, validationController.signal);
+      assertCurrent();
+      if (!me?.is_bot || !me?.username) throw new Error("Der Token gehört nicht zu einem verwendbaren Telegram-Bot.");
+      const webhook = await telegramApi(token, "getWebhookInfo", {}, validationController.signal);
+      assertCurrent();
+      if (webhook?.url) {
+        throw new Error("Für diesen Bot ist bereits ein Webhook eingerichtet. Bitte verwende einen neuen Bot oder entferne den Webhook zuerst.");
+      }
+      const pending = await telegramApi(token, "getUpdates", {
+        timeout: 0,
+        allowed_updates: ["message"],
+      }, validationController.signal);
+      assertCurrent();
+      const initialOffset = (pending || []).reduce(
+        (maximum, update) => Math.max(maximum, Number(update.update_id) + 1),
+        0,
+      );
+      const nonce = randomBytes(18).toString("base64url");
+      const pairingId = randomBytes(12).toString("hex");
+      const expiresAtMs = now() + expiryMs;
+      const bot = {
+        id: String(me.id),
+        name: String(me.first_name || me.username),
+        username: String(me.username),
+      };
+      session = {
+        id: pairingId,
+        status: "waiting",
+        bot,
+        telegramUrl: `https://t.me/${encodeURIComponent(bot.username)}?start=${encodeURIComponent(nonce)}`,
+        expiresAtMs,
+        expiresAt: new Date(expiresAtMs).toISOString(),
+        error: null,
+      };
+      void poll(pairingId, token, nonce, initialOffset, validationController);
+      return publicSession();
+    } catch (error) {
+      if (controller === validationController) controller = null;
+      throw error;
     }
-    const pending = await telegramApi(token, "getUpdates", {
-      timeout: 0,
-      allowed_updates: ["message"],
-    });
-    assertCurrent();
-    const initialOffset = (pending || []).reduce(
-      (maximum, update) => Math.max(maximum, Number(update.update_id) + 1),
-      0,
-    );
-    const nonce = randomBytes(18).toString("base64url");
-    const pairingId = randomBytes(12).toString("hex");
-    const expiresAtMs = now() + expiryMs;
-    const bot = {
-      id: String(me.id),
-      name: String(me.first_name || me.username),
-      username: String(me.username),
-    };
-    session = {
-      id: pairingId,
-      status: "waiting",
-      bot,
-      telegramUrl: `https://t.me/${encodeURIComponent(bot.username)}?start=${encodeURIComponent(nonce)}`,
-      expiresAtMs,
-      expiresAt: new Date(expiresAtMs).toISOString(),
-      error: null,
-    };
-    void poll(pairingId, token, nonce, initialOffset);
-    return publicSession();
   }
 
   return {

@@ -204,3 +204,23 @@ test("Cache-Schreibfehler lassen den Checker nicht dauerhaft auf checking stehen
   await assert.rejects(checker.check());
   assert.notEqual(checker.status().state, "checking");
 });
+
+test("nicht unterstütztes chmod verhindert den atomaren Cache-Austausch nicht", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "rossmann-update-"));
+  const cachePath = path.join(directory, "update-check.json");
+  const checker = createUpdateChecker({
+    currentVersion: "0.4.0",
+    cachePath,
+    chmodImpl: async () => {
+      const error = new Error("chmod nicht unterstützt");
+      error.code = "EPERM";
+      throw error;
+    },
+    fetchImpl: async () => ({ ok: false, status: 404 }),
+  });
+
+  await checker.initialize(true);
+  const result = await checker.check();
+  assert.equal(result.state, "unavailable");
+  assert.equal(JSON.parse(await readFile(cachePath, "utf8")).result, "unavailable");
+});

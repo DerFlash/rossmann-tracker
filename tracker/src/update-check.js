@@ -91,6 +91,7 @@ export function createUpdateChecker({
   cachePath,
   fetchImpl = globalThis.fetch,
   now = () => Date.now(),
+  chmodImpl = chmod,
 } = {}) {
   if (!SEMVER_PATTERN.test(String(currentVersion || "").trim())) throw new Error("Aktuelle Version ist ungültig.");
   if (!cachePath) throw new Error("Pfad für den Update-Cache fehlt.");
@@ -112,7 +113,11 @@ export function createUpdateChecker({
     await mkdir(path.dirname(cachePath), { recursive: true });
     const temporaryPath = `${cachePath}.tmp`;
     await writeFile(temporaryPath, `${JSON.stringify(nextCache, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-    await chmod(temporaryPath, 0o600);
+    try {
+      await chmodImpl(temporaryPath, 0o600);
+    } catch (error) {
+      if (!["EPERM", "EINVAL"].includes(error?.code)) throw error;
+    }
     await rename(temporaryPath, cachePath);
     cache = nextCache;
   }

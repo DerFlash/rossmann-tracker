@@ -197,3 +197,27 @@ test("ignoriert eine alte Long-Poll-Antwort nach dem Start einer neuen Kopplung"
   assert.deepEqual(pairedTokens, []);
   manager.cancel();
 });
+
+test("Abbruch beendet bereits die initiale Bot-Validierung", async () => {
+  let validationSignal = null;
+  const manager = createTelegramPairingManager({
+    fetchImpl: async (_url, options) => {
+      validationSignal = options.signal;
+      return new Promise((_resolve, reject) => {
+        options.signal.addEventListener(
+          "abort",
+          () => reject(options.signal.reason),
+          { once: true },
+        );
+      });
+    },
+    onPaired: async () => {},
+  });
+
+  const start = manager.start("secret-token");
+  await waitFor(() => validationSignal instanceof AbortSignal);
+  manager.cancel();
+
+  await assert.rejects(start, { name: "AbortError" });
+  assert.equal(validationSignal.aborted, true);
+});

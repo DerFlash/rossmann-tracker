@@ -91,3 +91,17 @@ test("rollt Zugangsdaten und Offset bei Abbruch während der Übernahme zurück"
   assert.deepEqual(saved, [99, 41]);
   assert.deepEqual(events, ["suspend", "commit:new", "commit:rollback", "resume:41"]);
 });
+
+test("bewahrt einen textuellen Abbruchgrund", async () => {
+  const { bot } = botFixture();
+  const controller = new AbortController();
+  controller.abort("manuell beendet");
+
+  await assert.rejects(applyTelegramPairing({
+    bot,
+    nextOffset: 99,
+    signal: controller.signal,
+    saveOffset: async () => {},
+    commitCredentials: async () => {},
+  }), (error) => error.name === "AbortError" && error.message === "manuell beendet");
+});
