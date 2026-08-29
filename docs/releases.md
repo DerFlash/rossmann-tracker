@@ -66,7 +66,7 @@ ghcr.io/derflash/rossmann-tracker:<version>
 ghcr.io/derflash/rossmann-tracker:stable
 ```
 
-Der konkrete Versionstag wird nicht wiederverwendet und muss strikt größer als alle bisherigen Stable-Releases sein. Das Image erhält zunächst die validierten Build-Metadaten und eine signierte GitHub-Attestation. Digest, beide Zielarchitekturen und die OCI-Metadaten werden geprüft. Erst wenn das Image außerdem ohne Anmeldung abrufbar ist, wird `stable` auf exakt dessen Digest weiterbewegt. Nach einer weiteren Registry-Prüfung erzeugt der Workflow das GitHub Release samt `docker-compose.yml` und `.env.example`.
+Der konkrete Versionstag wird nicht wiederverwendet und muss strikt größer als alle bisherigen Stable-Releases sein. Das Image erhält zunächst die validierten Build-Metadaten und eine signierte GitHub-Attestation. Digest, beide Zielarchitekturen und die OCI-Metadaten werden geprüft. Erst wenn das Image außerdem ohne Anmeldung abrufbar ist, wird `stable` auf exakt dessen Digest weiterbewegt. Nach einer weiteren Registry-Prüfung erzeugt der Workflow das GitHub Release samt `docker-compose.yml`, `default.env.example` und `UPDATE.md`.
 
 Bricht ein Lauf nach dem Push des Versionstags ab, kann derselbe Commit erneut gestartet werden. Ein bereits vorhandenes Image wird ausschließlich dann weiterverwendet, wenn Digest, Version, Revision, Buildzeit und beide Plattformen den erwarteten Release-Metadaten entsprechen. Netzwerk-, Authentifizierungs- und API-Fehler werden dabei nicht als „noch nicht vorhanden“ ausgelegt.
 
@@ -74,24 +74,51 @@ Das Zusammenführen des Workflows selbst veröffentlicht noch nichts. Sollte das
 
 ## Installation und manuelles Update
 
-Die Release-Compose-Datei verwendet standardmäßig den Kanal `stable`. Persistente Einstellungen, History und Browserprofil liegen weiterhin in den lokalen Verzeichnissen `data/` und `browser-data/`.
+Für normale Nutzer ist die Release-Installation vorgesehen. Die veröffentlichte Compose-Datei verwendet standardmäßig den Kanal `stable`; persistente Einstellungen, History und Browserprofil liegen lokal in `data/` und `browser-data/`.
 
-Die als Release-Artefakt angebotene `docker-compose.yml` verwendet ein fertiges GHCR-Image. Sie unterscheidet sich bewusst von der Root-Compose-Datei des Quellrepositorys, die mit `build: .` lokal baut. Beide Installationswege dürfen nicht vermischt werden. Jedes Release enthält zusätzlich `UPDATE.md` mit Vorprüfung, konsistenter Sicherung und Rollback.
+### Erstinstallation unter macOS und Linux
 
 ```bash
-docker compose pull
+mkdir -p rossmann-tracker
+cd rossmann-tracker
+curl -fL -o docker-compose.yml \
+  https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml
 docker compose up -d
 ```
 
-Wer eine Version unveränderlich festhalten möchte, setzt in `.env` beispielsweise:
+### Erstinstallation unter Windows PowerShell
+
+```powershell
+New-Item -ItemType Directory -Force rossmann-tracker
+Set-Location rossmann-tracker
+Invoke-WebRequest -Uri "https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
+docker compose up -d
+```
+
+Compose lädt `ghcr.io/derflash/rossmann-tracker:stable` beim ersten Start automatisch. Ein separates `docker pull` ist nicht erforderlich. Die Weboberfläche ist danach unter <http://127.0.0.1:8787> erreichbar.
+
+Die GHCR-Paketansicht kann zusätzlich einen von der Build-Attestation erzeugten Eintrag mit einem Namen wie `sha256-…` hervorheben. Dieser Eintrag dokumentiert die Build-Provenienz und ist kein unterstützter Laufzeittag. Für Installationen werden ausschließlich `stable` oder ein konkreter Versionstag wie `0.4.0` verwendet.
+
+Wer eine Version unveränderlich festhalten möchte, lädt die optionale Release-Datei `default.env.example`, speichert sie als `.env` und setzt darin beispielsweise:
 
 ```text
 ROSSMANN_TRACKER_IMAGE=ghcr.io/derflash/rossmann-tracker:0.4.0
 ```
 
-Der Tracker erhält weder Zugriff auf den Docker-Socket noch die Möglichkeit, sich selbst zu aktualisieren.
+Vor einem Update wird der laufende Tracker gestoppt und über den netzwerkisolierten Compose-Dienst `backup` gesichert. Er liest die persistenten Verzeichnisse nur lesend und schreibt einen atomar fertiggestellten Snapshot samt Version und Schemastand nach `backups/`. Erst nach erfolgreicher Sicherung wird das neue Image geladen:
 
-Vor einem Update wird der laufende Tracker gestoppt und über den netzwerkisolierten Compose-Dienst `backup` gesichert. Er liest die persistenten Verzeichnisse nur lesend und schreibt einen atomar fertiggestellten Snapshot samt Version und Schemastand nach `backups/`. Gespeicherte Einstellungen tragen eine explizite Schemaversion; Daten aus einer unbekannten zukünftigen Version werden nicht stillschweigend mit einem älteren Container geöffnet.
+```bash
+docker compose config --quiet
+docker compose stop tracker
+docker compose run --rm backup
+docker compose start tracker
+docker compose pull
+docker compose up -d
+```
+
+Die als Release-Artefakt angebotene `docker-compose.yml` verwendet das fertige GHCR-Image. Sie unterscheidet sich bewusst von der Root-Compose-Datei des Quellrepositorys, die mit `build: .` lokal baut. Beide Installationswege dürfen nicht vermischt werden. Jedes Release enthält zusätzlich `UPDATE.md` mit Vorprüfung, konsistenter Sicherung und Rollback.
+
+Der Tracker erhält weder Zugriff auf den Docker-Socket noch die Möglichkeit, sich selbst zu aktualisieren. Gespeicherte Einstellungen tragen eine explizite Schemaversion; Daten aus einer unbekannten zukünftigen Version werden nicht stillschweigend mit einem älteren Container geöffnet.
 
 ## Updatehinweis in der Weboberfläche
 

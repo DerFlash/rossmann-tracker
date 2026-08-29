@@ -4,13 +4,40 @@ Der Docker-Teil des **Rossmann Store Trackers** prüft ausgewählte Rossmann-Pro
 
 ## Voraussetzungen
 
-- Docker Engine mit Docker Compose oder Docker Desktop
+- Docker Engine mit Docker Compose 2.24 oder neuer oder eine aktuelle Version von Docker Desktop
 - Zugriff auf die lokale Weboberfläche
-- ein eigener Telegram-Bot für Benachrichtigungen
+- optional ein eigener Telegram-Bot für Benachrichtigungen
 
-Unterstützte Plattformen und Mindestversionen werden pro Release in den Release Notes genannt. Der Quellstand wird in CI für **linux/amd64** und **linux/arm64** gebaut.
+Das veröffentlichte Image unterstützt **linux/amd64** und **linux/arm64**. Weitere Mindestversionen werden pro Release in den Release Notes genannt.
 
-## Installation aus dem Repository
+## Empfohlene Installation aus dem Release
+
+Die Release-Compose-Datei startet das fertig gebaute öffentliche Image aus der GitHub Container Registry. Git, Node.js, ein lokaler Build und ein GitHub-Login sind dafür nicht erforderlich.
+
+### macOS und Linux
+
+~~~bash
+mkdir -p rossmann-tracker
+cd rossmann-tracker
+curl -fL -o docker-compose.yml \
+  https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml
+docker compose up -d
+~~~
+
+### Windows PowerShell
+
+~~~powershell
+New-Item -ItemType Directory -Force rossmann-tracker
+Set-Location rossmann-tracker
+Invoke-WebRequest -Uri "https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
+docker compose up -d
+~~~
+
+Compose lädt `ghcr.io/derflash/rossmann-tracker:stable` beim ersten Start automatisch. Ein vorheriges `docker pull` ist nicht notwendig. Die Weboberfläche ist anschließend unter <http://127.0.0.1:8787> erreichbar; der Port ist absichtlich nur an die lokale Loopback-Adresse gebunden.
+
+## Installation aus dem Quellcode
+
+Wer den aktuellen Quellstand lokal bauen oder am Projekt entwickeln möchte, verwendet die Root-Compose-Datei des Repositorys:
 
 ~~~bash
 git clone https://github.com/DerFlash/rossmann-tracker.git
@@ -19,13 +46,13 @@ docker compose up -d --build
 docker compose logs -f tracker
 ~~~
 
-Die Weboberfläche ist anschließend unter <http://127.0.0.1:8787> erreichbar. Der Port ist absichtlich nur an die lokale Loopback-Adresse gebunden.
+Diese Variante baut das Image lokal über `build: .`. Sie ist nicht der empfohlene Installationsweg für normale Nutzer und darf nicht mit der Release-Compose-Datei vermischt werden.
 
 ## Ersteinrichtung
 
 Die Weboberfläche führt nacheinander durch:
 
-1. eigenen Telegram-Bot verbinden,
+1. auf Wunsch einen eigenen Telegram-Bot verbinden,
 2. PLZ-Suchgebiet oder konkrete Filialen auswählen,
 3. mindestens ein Katalogprodukt aktivieren.
 
@@ -60,7 +87,22 @@ docker compose restart tracker
 
 Der Container benötigt keinen Docker-Socket und keine weitreichenden Host-Rechte. Einstellungen werden über die lokale Weboberfläche geändert.
 
-## Manuelles Update einer Source-Installation
+## Manuelles Update einer Release-Installation
+
+Die empfohlene Release-Installation verwendet das veröffentlichte GHCR-Image. Vor dem Update wird der laufende Tracker konsistent gesichert:
+
+~~~bash
+docker compose config --quiet
+docker compose stop tracker
+docker compose run --rm backup
+docker compose start tracker
+docker compose pull
+docker compose up -d
+~~~
+
+Das Release enthält zusätzlich `UPDATE.md` mit dem vollständigen Vorprüfungs- und Rollbackablauf. Die optionale Datei `default.env.example` kann als Vorlage heruntergeladen und bei Bedarf als `.env` gespeichert werden.
+
+## Manuelles Update einer Quellinstallation
 
 Wer das Repository geklont hat, verwendet die Root-Compose-Datei mit **build: .**. Diese Installation wird aus dem Quellstand aktualisiert:
 
@@ -72,20 +114,7 @@ docker compose run --rm backup
 docker compose up -d --build
 ~~~
 
-## Manuelles Update einer Release-Installation
-
-Die bei einem GitHub Release angebotene **docker-compose.yml** verwendet dagegen das veröffentlichte GHCR-Image. Die Compose-Datei und die optionale **.env.example** werden gemeinsam in einem eigenen Installationsverzeichnis gespeichert. Dort gilt:
-
-~~~bash
-docker compose config --quiet
-docker compose stop tracker
-docker compose run --rm backup
-docker compose start tracker
-docker compose pull
-docker compose up -d
-~~~
-
-Persistente Verzeichnisse bleiben bei beiden Wegen erhalten. Der Tracker-Container läuft mit schreibgeschütztem Root-Dateisystem, ohne zusätzliche Linux-Capabilities und ohne Docker-Socket; beschreibbar bleiben nur die ausdrücklich eingebundenen Laufzeitverzeichnisse und temporärer Speicher. Die beiden Compose-Dateien dürfen nicht vermischt werden. Hinweise zu Versionstags, Rollback und Release-Artefakten stehen unter [Versionen und Releases](releases.md). Release-Installationen erhalten zusätzlich `UPDATE.md` mit dem vollständigen Vorprüfungs- und Rollbackablauf.
+Persistente Verzeichnisse bleiben bei beiden Wegen erhalten. Der Tracker-Container läuft mit schreibgeschütztem Root-Dateisystem, ohne zusätzliche Linux-Capabilities und ohne Docker-Socket; beschreibbar bleiben nur die ausdrücklich eingebundenen Laufzeitverzeichnisse und temporärer Speicher. Die beiden Compose-Dateien dürfen nicht vermischt werden. Hinweise zu Versionstags, Rollback und Release-Artefakten stehen unter [Versionen und Releases](releases.md).
 
 ## Einmalige Namensumstellung
 
