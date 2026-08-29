@@ -1,0 +1,26 @@
+{
+  "updated_at": "2026-08-27",
+  "working": [
+    { "name": "Pin-Kollektion", "dan": "228940" },
+    { "name": "Pokémon ex-Kampfdeck", "dan": "150727" },
+    { "name": "Mew VMAX Liga-Kampfdeck", "dan": "228937", "ean": "0820650453113" },
+    { "name": "Premium-Turnierkollektion Zyrus/Sophora", "dan": "228938", "ean": "0820650454172" },
+    { "name": "Axantor VSTAR Premium-Kollektion", "dan": "228942", "ean": "0820650453984" },
+    { "name": "Mega-Bisaflor-ex Premium-Kollektion", "dan": "214021" },
+    { "name": "Pokémon Day 2026 Kollektion", "dan": "214015" },
+    { "name": "Pokémon Adventskalender 2023", "dan": "140009", "ean": "0820650457463" },
+    { "name": "Back-to-School-Blister mit Radiergummi", "dan": "213989" },
+    { "name": "Erhabene Helden Booster Bundle", "dan": "228936", "ean": "0196214131651" },
+    { "name": "Maskerade im Zwielicht Top-Trainer-Box", "dan": "167794", "ean": "0820650458873" },
+    { "name": "Pokémon Tin (Rossmann-Sammelartikel)", "dan": "015382", "ean": "4007396203066" },
+    { "name": "Pokémon Enhanced 2-Pack 2026 – Myrapla, Duflor & Giflor", "dan": "228928", "ean": "0196214134607" }
+  ],
+  "request_error": [
+    { "name": "Prismatische Entwicklungen Boosterbundle", "dan": "213986" },
+    { "name": "Erhabene Helden Tech-Sticker-Kollektion", "dan": "213992" },
+    { "name": "Karmesin & Purpur Top-Trainer-Box", "dan": "148642" }
+  ],
+  "ean_only": [
+    { "name": "Prismatische Entwicklungen Super-Premium-Kollektion", "ean": "0196214106086" }
+  ]
+}

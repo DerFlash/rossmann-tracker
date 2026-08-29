@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rossmann Store Tracker – Bookmarklet installieren</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: #f5f1ed; color: #221f1d; }
+    main { max-width: 760px; margin: 64px auto; padding: 0 24px; }
+    .card { background: #fff; border: 1px solid #e5ddd6; border-radius: 22px; padding: 32px; box-shadow: 0 18px 60px rgba(49,35,25,.10); }
+    h1 { margin: 0 0 10px; font-size: clamp(28px,5vw,42px); letter-spacing: -.035em; }
+    p, li { line-height: 1.55; }
+    .lead { color: #655b55; font-size: 18px; margin: 0 0 28px; }
+    ol { padding-left: 22px; }
+    .bookmark { display: inline-flex; align-items: center; justify-content: center; margin: 12px 0 18px; padding: 15px 22px; border-radius: 14px; background: #c8192e; color: white; text-decoration: none; font-weight: 800; box-shadow: 0 8px 22px rgba(200,25,46,.25); cursor: grab; }
+    button { border: 1px solid #d7cdc5; background: white; border-radius: 10px; padding: 10px 14px; font: inherit; font-weight: 650; cursor: pointer; }
+    button:hover { background: #faf7f5; }
+    details { margin-top: 24px; border-top: 1px solid #eee6e0; padding-top: 18px; }
+    summary { cursor: pointer; font-weight: 750; }
+    textarea { width: 100%; min-height: 150px; margin: 12px 0; box-sizing: border-box; resize: vertical; border: 1px solid #d7cdc5; border-radius: 10px; padding: 12px; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .note { margin-top: 22px; padding: 14px 16px; border-radius: 12px; background: #fff7df; color: #5d4a14; }
+    code { background: #f2eeeb; border-radius: 5px; padding: 2px 5px; }
+    #copied { min-height: 24px; color: #16733c; font-weight: 650; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <h1>Rossmann Store Tracker</h1>
+      <p class="lead">Ein kleines Bestands-Widget direkt auf rossmann.de.</p>
+
+      <ol>
+        <li>Blende in Safari die Favoritenleiste ein.</li>
+        <li>Ziehe den roten Button in die Favoritenleiste.</li>
+        <li>Klicke auf den neuen Favoriten. Außerhalb von Rossmann wirst du zuerst zu <code>rossmann.de</code> weitergeleitet; klicke ihn dort erneut an.</li>
+      </ol>
+
+      <a class="bookmark" id="bookmark" href="#">Rossmann Store Tracker</a>
+      <div><button id="copy-bookmarklet" type="button">Bookmarklet-Adresse kopieren</button></div>
+      <p id="copied" aria-live="polite"></p>
+
+      <p class="note">Das Widget fragt ausschließlich Rossmanns eigene Filialbestands-Schnittstelle ab. Eine PLZ prüft standardmäßig alle von Rossmann gelieferten Filialen im Umkreis; optional kannst du auf eine Filiale einschränken. DAN-Liste, PLZ und Auswahl bleiben lokal in deinem Browser.</p>
+
+      <details>
+        <summary>Alternative: Code für die Entwicklerkonsole</summary>
+        <textarea id="console-code" readonly spellcheck="false"></textarea>
+        <button id="copy-code" type="button">Konsolencode kopieren</button>
+      </details>
+    </section>
+  </main>
+
+  <script type="text/plain" id="widget-source">
+(()=>{
+  const ROOT_ID="rossmann-store-tracker-root";
+  const STORE_KEY="rossmann-store-tracker-v1";
+  const LEGACY_STORE_KEY="rossmann-dan-pruefer-v1";
+  const old=document.getElementById(ROOT_ID);
+  if(old){
+    const panel=old.shadowRoot.querySelector(".rdp-panel");
+    panel.hidden=!panel.hidden;
+    return;
+  }
+  if(!/(^|\.)rossmann\.de$/i.test(location.hostname)){
+    alert("Rossmann wird geöffnet. Dort das Store-Tracker-Bookmarklet bitte erneut anklicken.");
+    location.assign("https://www.rossmann.de/de/");
+    return;
+  }
+
+  const defaults={
+    postcode:"",
+    items:"Pin-Kollektion | 228940\nPokémon ex-Kampfdeck | 150727\nMew VMAX Liga-Kampfdeck | 228937\nPremium-Turnierkollektion Zyrus/Sophora | 228938\nAxantor VSTAR Premium-Kollektion | 228942\nMega-Bisaflor-ex Premium-Kollektion | 214021\nPokémon Day 2026 Kollektion | 214015\nPokémon Adventskalender 2023 | 140009\nBack-to-School-Blister mit Radiergummi | 213989\nErhabene Helden Booster Bundle | 228936\nMaskerade im Zwielicht Top-Trainer-Box | 167794\nPokémon Tin (Rossmann-Sammelartikel) | 015382\nPokémon Enhanced 2-Pack 2026 – Myrapla, Duflor & Giflor | 228928",
+    scope:"all",
+    selectedStoreId:"",
+    recentStores:[]
+  };
+  let saved={};
+  try{
+    const currentSaved=localStorage.getItem(STORE_KEY);
+    const legacySaved=currentSaved===null?localStorage.getItem(LEGACY_STORE_KEY):null;
+    saved=JSON.parse(currentSaved??legacySaved??"{}");
+    if(currentSaved===null&&legacySaved!==null){
+      localStorage.setItem(STORE_KEY,JSON.stringify(saved));
+      localStorage.removeItem(LEGACY_STORE_KEY);
+    }
+  }catch(_){ saved={}; }
+  const state={...defaults,...saved};
+
+  const host=document.createElement("div");
+  host.id=ROOT_ID;
+  host.style.cssText="position:fixed;right:18px;bottom:18px;z-index:2147483647";
+  document.documentElement.appendChild(host);
+  const shadow=host.attachShadow({mode:"open"});
+  shadow.innerHTML=`
+    <style>
+      *{box-sizing:border-box}button,input,select,textarea{font:inherit}
+      .rdp-launch{width:58px;height:58px;border:0;border-radius:50%;background:#c8192e;color:#fff;font:800 15px/1 system-ui;box-shadow:0 10px 30px #0004;cursor:pointer}
+      .rdp-panel{position:absolute;right:0;bottom:70px;width:min(580px,calc(100vw - 24px));max-height:min(760px,calc(100vh - 100px));overflow:auto;background:#fff;color:#211f1d;border:1px solid #ded6d0;border-radius:18px;box-shadow:0 20px 70px #0005;font:14px/1.4 system-ui,-apple-system,sans-serif}
+      .rdp-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:15px 17px;background:#c8192e;color:#fff;border-radius:17px 17px 0 0}
+      .rdp-head strong{font-size:17px}.rdp-icon{border:0;background:transparent;color:#fff;font-size:22px;cursor:pointer}
+      .rdp-body{padding:16px}.rdp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      label{display:block;color:#514a45;font-size:12px;font-weight:750}input,select,textarea{width:100%;margin-top:5px;border:1px solid #cec5be;border-radius:9px;padding:9px;color:#211f1d;background:#fff}
+      textarea{min-height:112px;resize:vertical;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace}
+      .rdp-hint{margin:6px 0 12px;color:#756b64;font-size:12px}.rdp-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+      .rdp-check{border:0;border-radius:10px;padding:10px 15px;background:#c8192e;color:#fff;font-weight:800;cursor:pointer}.rdp-check:disabled{opacity:.55;cursor:wait}
+      .rdp-clear,.rdp-load-stores{border:1px solid #d5ccc5;border-radius:10px;padding:9px 12px;background:#fff;color:#403a36;cursor:pointer}.rdp-load-stores:disabled{opacity:.55;cursor:wait}
+      .rdp-status{margin-left:auto;color:#6b625c;font-size:12px}.rdp-results{margin-top:14px;display:grid;gap:8px}
+      .rdp-card{border:1px solid #e6dfda;border-radius:12px;padding:11px}.rdp-card.bad{background:#fff8f8;border-color:#f1c9cd}
+      .rdp-card-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}.rdp-name{min-width:0;font-weight:800;overflow-wrap:anywhere}.rdp-dan{margin-top:2px;color:#6e655f;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+      .rdp-badge{white-space:nowrap;text-align:center;border-radius:999px;padding:5px 9px;font-weight:850}.ok{background:#dff5e7;color:#116531}.zero{background:#eeeae7;color:#5f5751}.bad .rdp-badge,.rdp-badge.bad{background:#fde3e3;color:#9a1826}
+      .rdp-store-list{display:grid;gap:6px;margin-top:9px}.rdp-store-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding-top:7px;border-top:1px solid #eee7e2}.rdp-store{min-width:0;color:#403a36}.rdp-stock{white-space:nowrap;font-weight:850;color:#116531}
+      .rdp-meta{margin-top:8px;color:#766d67;font-size:11px}.rdp-zero-details{margin-top:8px}.rdp-zero-details summary{cursor:pointer;color:#6b625c;font-size:12px}.rdp-zero-list{margin:6px 0 0;padding-left:18px;color:#766d67;font-size:11px}.rdp-empty{padding:14px;border-radius:10px;background:#f6f2ef;color:#6b625c}
+      @media(max-width:520px){.rdp-grid{grid-template-columns:1fr}.rdp-status{width:100%;margin-left:0}.rdp-card-head{grid-template-columns:minmax(0,1fr) auto}}
+    </style>
+    <button class="rdp-launch" title="Rossmann Store Tracker">DAN</button>
+    <section class="rdp-panel" aria-label="Rossmann Store Tracker">
+      <header class="rdp-head"><strong>Rossmann Store Tracker</strong><button class="rdp-icon" title="Schließen">×</button></header>
+      <div class="rdp-body">
+        <div class="rdp-grid">
+          <label>PLZ<input class="rdp-postcode" inputmode="numeric" maxlength="5"></label>
+          <label>Ziel<select class="rdp-store"></select></label>
+        </div>
+        <p class="rdp-hint">Standardmäßig werden alle von Rossmann gelieferten Filialen im PLZ-Umkreis geprüft.</p>
+        <div><button class="rdp-load-stores">Optionale Filialauswahl laden</button></div>
+        <label style="margin-top:11px">Produkte / DANs<textarea class="rdp-items" spellcheck="false"></textarea></label>
+        <p class="rdp-hint">Eine Zeile je Produkt: <b>Name | DAN</b> oder nur <b>DAN</b>.</p>
+        <div class="rdp-actions">
+          <button class="rdp-check">Bestand prüfen</button>
+          <button class="rdp-clear">Ergebnisse leeren</button>
+          <span class="rdp-status"></span>
+        </div>
+        <div class="rdp-results"><div class="rdp-empty">Noch keine Abfrage ausgeführt.</div></div>
+      </div>
+    </section>`;
+
+  const $=s=>shadow.querySelector(s);
+  const panel=$(".rdp-panel");
+  const postcode=$(".rdp-postcode");
+  const storeSelect=$(".rdp-store");
+  const loadStoresButton=$(".rdp-load-stores");
+  const items=$(".rdp-items");
+  const results=$(".rdp-results");
+  const status=$(".rdp-status");
+  const check=$(".rdp-check");
+  postcode.value=state.postcode;
+  items.value=state.items;
+  state.recentStores=Array.isArray(state.recentStores)?state.recentStores:[];
+
+  const normalizeStore=store=>({
+    id:String(store.id||""),
+    city:String(store.city||""),
+    postcode:String(store.postcode||""),
+    street:String(store.street||""),
+    productInfo:(Array.isArray(store.productInfo)?store.productInfo:store.productInfo?[store.productInfo]:[]).map(product=>({
+      available:product.available===true||String(product.available).toLowerCase()==="true",
+      dan:String(product.dan||""),
+      stock:String(product.stock??"")
+    }))
+  });
+  const storeLabel=store=>`${store.city} – ${store.street} (${store.postcode})`;
+  const resolvePostcode=(enteredPostcode,selectedStoreId,stores)=>{
+    const selectedStore=stores.map(normalizeStore).find(store=>store.id===selectedStoreId);
+    return selectedStore?.postcode||enteredPostcode;
+  };
+  const persist=()=>{
+    const selected=storeSelect.value||"all";
+    state.scope=selected==="all"?"all":"store";
+    state.selectedStoreId=state.scope==="store"?selected:"";
+    localStorage.setItem(STORE_KEY,JSON.stringify({
+      postcode:postcode.value.trim(),
+      items:items.value,
+      scope:state.scope,
+      selectedStoreId:state.selectedStoreId,
+      recentStores:state.recentStores
+    }));
+  };
+  const rememberStores=stores=>{
+    const seen=new Set();
+    state.recentStores=[...stores.map(normalizeStore),...state.recentStores.map(normalizeStore)]
+      .filter(store=>store.id&&!seen.has(store.id)&&seen.add(store.id))
+      .slice(0,24);
+  };
+  const renderStores=(nearbyStores=[],preferredValue=state.scope==="store"?state.selectedStoreId:"all")=>{
+    const nearby=[...new Map(nearbyStores.map(normalizeStore).map(store=>[store.id,store])).values()];
+    const recent=state.recentStores.map(normalizeStore);
+    storeSelect.textContent="";
+    const allOption=document.createElement("option");
+    allOption.value="all";
+    allOption.textContent=nearby.length?`Alle ${nearby.length} Filialen im Umkreis`:"Alle Filialen im Umkreis";
+    storeSelect.appendChild(allOption);
+    const addGroup=(label,stores)=>{
+      if(!stores.length) return;
+      const group=document.createElement("optgroup"); group.label=label;
+      stores.forEach(store=>{const option=document.createElement("option");option.value=store.id;option.textContent=storeLabel(store);group.appendChild(option);});
+      storeSelect.appendChild(group);
+    };
+    addGroup("Zuletzt gefunden",recent);
+    addGroup("Im Umkreis gefunden",nearby.filter(store=>!recent.some(recentStore=>recentStore.id===store.id)));
+    const ids=[...storeSelect.options].map(option=>option.value);
+    storeSelect.value=ids.includes(String(preferredValue))?String(preferredValue):"all";
+  };
+  renderStores();
+  const parseItems=()=>items.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).map(line=>{
+    const parts=line.split("|").map(s=>s.trim());
+    const dan=(parts.length>1?parts.pop():parts[0]).replace(/\D/g,"");
+    const name=parts.length?parts.join(" | "):dan;
+    return {name:name||dan,dan};
+  }).filter(x=>/^\d{4,8}$/.test(x.dan));
+  const createCard=(item,badgeText,badgeKind)=>{
+    const card=document.createElement("article"); card.className=`rdp-card${badgeKind==="bad"?" bad":""}`;
+    const head=document.createElement("div"); head.className="rdp-card-head";
+    const identity=document.createElement("div");
+    const name=document.createElement("div"); name.className="rdp-name"; name.textContent=item.name;
+    const dan=document.createElement("div"); dan.className="rdp-dan"; dan.textContent=`DAN ${item.dan}`;
+    const badge=document.createElement("div"); badge.className=`rdp-badge ${badgeKind}`; badge.textContent=badgeText;
+    identity.append(name,dan); head.append(identity,badge); card.appendChild(head);
+    results.appendChild(card);
+    return card;
+  };
+  const appendStoreRow=(container,match)=>{
+    const row=document.createElement("div"); row.className="rdp-store-row";
+    const store=document.createElement("div"); store.className="rdp-store"; store.textContent=storeLabel(match.store);
+    const stock=document.createElement("div"); stock.className="rdp-stock"; stock.textContent=`${match.stock} Stk.`;
+    row.append(store,stock); container.appendChild(row);
+  };
+  const addProductResult=(item,matches,allStores)=>{
+    const positives=matches.filter(match=>match.stock>0).sort((a,b)=>b.stock-a.stock);
+    const zeros=matches.filter(match=>match.stock===0);
+    if(!allStores){
+      const match=matches[0];
+      const card=createCard(item,`${match.stock} Stk.`,match.stock>0?"ok":"zero");
+      const meta=document.createElement("div"); meta.className="rdp-meta";
+      meta.textContent=`${storeLabel(match.store)} · ${match.available?"Artikel wird geführt":"laut Rossmann nicht verfügbar"}`;
+      card.appendChild(meta);
+      return;
+    }
+    const card=createCard(item,positives.length?`${positives.length}× auf Lager`:"Kein Bestand",positives.length?"ok":"zero");
+    if(positives.length){
+      const list=document.createElement("div"); list.className="rdp-store-list";
+      positives.forEach(match=>appendStoreRow(list,match));
+      card.appendChild(list);
+    }else{
+      const meta=document.createElement("div"); meta.className="rdp-meta";
+      meta.textContent=`Kein Bestand in ${zeros.length} ${zeros.length===1?"Filiale":"Filialen"} im Umkreis.`;
+      card.appendChild(meta);
+    }
+    if(zeros.length&&positives.length){
+      const details=document.createElement("details"); details.className="rdp-zero-details";
+      const summary=document.createElement("summary"); summary.textContent=`${zeros.length} ${zeros.length===1?"Filiale":"Filialen"} ohne Bestand`;
+      const list=document.createElement("ul"); list.className="rdp-zero-list";
+      zeros.forEach(match=>{const entry=document.createElement("li");entry.textContent=storeLabel(match.store);list.appendChild(entry);});
+      details.append(summary,list); card.appendChild(details);
+    }
+  };
+  const addError=(item,message)=>{
+    const card=createCard(item,"Fehler","bad");
+    const meta=document.createElement("div"); meta.className="rdp-meta"; meta.textContent=message;
+    card.appendChild(meta);
+  };
+  const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  const fetchStock=async(url,item,label,{maxAttempts=3}={})=>{
+    for(let attempt=1;attempt<=maxAttempts;attempt++){
+      status.textContent=attempt===1
+        ?label
+        :`Wiederholung ${attempt-1}/${maxAttempts-1} für ${item.dan}`;
+      const response=await fetch(url,{credentials:"include",cache:"no-store"});
+      if(response.ok) return response;
+      if((response.status===429||response.status>=500)&&attempt<maxAttempts){
+        await pause(attempt===1?1800:3600);
+        continue;
+      }
+      throw new Error(response.status===406
+        ?"HTTP 406 – keine Bestandsantwort für diese DAN."
+        :`Rossmann-Abfrage fehlgeschlagen: HTTP ${response.status}`);
+    }
+  };
+  const parseStoreResponse=async response=>{
+    const type=(response.headers.get("content-type")||"").toLowerCase();
+    const body=await response.text();
+    const trimmed=body.trimStart();
+    const asArray=value=>Array.isArray(value)?value:value?[value]:[];
+    let stores=[];
+    if(type.includes("json")||trimmed.startsWith("{")||trimmed.startsWith("[")){
+      const data=JSON.parse(body);
+      stores=Array.isArray(data)?data:asArray(data.store??data.stores?.store??data.stores);
+    }else if(type.includes("xml")||trimmed.startsWith("<")){
+      const xml=new DOMParser().parseFromString(body,"application/xml");
+      if(xml.getElementsByTagName("parsererror").length) throw new Error("Rossmann lieferte ungültiges Filial-XML.");
+      const value=(node,name)=>node.getElementsByTagName(name)[0]?.textContent?.trim()||"";
+      stores=Array.from(xml.getElementsByTagName("store")).map(node=>({
+        id:value(node,"id"),
+        city:value(node,"city"),
+        postcode:value(node,"postcode"),
+        street:value(node,"street"),
+        productInfo:Array.from(node.getElementsByTagName("productInfo")).map(productNode=>({
+          available:value(productNode,"available"),
+          dan:value(productNode,"dan"),
+          stock:value(productNode,"stock")
+        }))
+      }));
+    }else{
+      throw new Error(`Unbekannte Filialantwort (${type||"ohne Content-Type"}).`);
+    }
+    return stores.map(store=>normalizeStore({
+      ...store,
+      productInfo:store.productInfo??store.productInfos?.productInfo??store.productInfos
+    })).filter(store=>store.id);
+  };
+  const requestStores=async zip=>{
+    const dans=[...new Set(parseItems().map(item=>item.dan))].slice(0,3);
+    const candidates=["",...dans];
+    const failures=[];
+    for(let index=0;index<candidates.length;index++){
+      const dan=candidates[index];
+      const url=new URL("/storefinder/.rest/store",location.origin);
+      url.searchParams.set("q",zip);
+      if(dan) url.searchParams.set("dan",dan);
+      try{
+        const response=await fetchStock(url,{dan:dan||"Filialen"},`Lade Filialauswahl ${index+1}/${candidates.length}`,{maxAttempts:2});
+        const stores=await parseStoreResponse(response);
+        if(stores.length) return stores;
+        failures.push("keine Treffer");
+      }catch(error){ failures.push(String(error?.message||error)); }
+      if(index<candidates.length-1) await pause(700);
+    }
+    throw new Error(`Filialsuche fehlgeschlagen: ${failures.at(-1)||"keine Treffer"}`);
+  };
+  const loadStores=async()=>{
+    const zip=postcode.value.trim();
+    if(!/^\d{5}$/.test(zip)){alert("Bitte eine gültige fünfstellige PLZ eingeben.");return [];}
+    loadStoresButton.disabled=true;
+    try{
+      const stores=await requestStores(zip);
+      if(!stores.length) throw new Error(`Keine Rossmann-Filialen für ${zip} gefunden.`);
+      const preferred=storeSelect.value||"all";
+      rememberStores(stores);
+      renderStores(stores,preferred);
+      persist();
+      status.textContent=`${stores.length} Filialen im Umkreis gefunden`;
+      return stores;
+    }catch(error){
+      status.textContent=String(error?.message||error);
+      return [];
+    }finally{loadStoresButton.disabled=false;}
+  };
+  const run=async()=>{
+    const list=parseItems();
+    if(!list.length){ alert("Bitte mindestens eine gültige DAN eingeben."); return; }
+    let target=storeSelect.value||"all";
+    const zip=resolvePostcode(postcode.value.trim(),target,state.recentStores);
+    if(!/^\d{5}$/.test(zip)){alert("Bitte eine gültige fünfstellige PLZ eingeben.");return;}
+    postcode.value=zip;
+    persist(); check.disabled=true; loadStoresButton.disabled=true; results.textContent=""; status.textContent="Prüfe...";
+    for(let i=0;i<list.length;i++){
+      const item=list[i];
+      try{
+        const url=new URL("/storefinder/.rest/store",location.origin);
+        url.searchParams.set("dan",item.dan); url.searchParams.set("q",zip);
+        const response=await fetchStock(url,item,`Prüfe ${i+1}/${list.length}`);
+        const stores=await parseStoreResponse(response);
+        if(i===0&&stores.length){
+          rememberStores(stores);
+          renderStores(stores,target);
+          target=storeSelect.value||"all";
+          persist();
+        }
+        const matches=[];
+        for(const store of stores){
+          const info=store.productInfo.find(product=>product.dan===item.dan);
+          if(!info) continue;
+          const stock=Number.parseInt(info.stock,10);
+          if(!Number.isFinite(stock)) throw new Error(`Ungültiger Bestand in Filiale ${store.id}.`);
+          matches.push({store,stock,available:info.available});
+        }
+        const relevant=target==="all"?matches:matches.filter(match=>match.store.id===target);
+        if(!relevant.length){
+          throw new Error(target==="all"
+            ?`Rossmann liefert für DAN ${item.dan} im Suchgebiet ${zip} keine Filialbestände.`
+            :`Filiale ${target} wurde für dieses Suchgebiet oder Produkt nicht gefunden.`);
+        }
+        addProductResult(item,relevant,target==="all");
+      }catch(error){ addError(item,String(error?.message||error)); }
+      if(i<list.length-1){
+        status.textContent=`Pause vor ${i+2}/${list.length}`;
+        await pause(1100);
+      }
+    }
+    check.disabled=false; loadStoresButton.disabled=false; status.textContent=`Fertig ${new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}`;
+  };
+
+  $(".rdp-launch").addEventListener("click",()=>panel.hidden=!panel.hidden);
+  $(".rdp-icon").addEventListener("click",()=>panel.hidden=true);
+  $(".rdp-clear").addEventListener("click",()=>{results.innerHTML='<div class="rdp-empty">Ergebnisse geleert.</div>';status.textContent="";});
+  loadStoresButton.addEventListener("click",loadStores);
+  check.addEventListener("click",run);
+  postcode.addEventListener("change",()=>{state.scope="all";state.selectedStoreId="";renderStores([],"all");persist();});
+  storeSelect.addEventListener("change",()=>{
+    const zip=resolvePostcode(postcode.value.trim(),storeSelect.value||"all",state.recentStores);
+    if(/^\d{5}$/.test(zip)) postcode.value=zip;
+    persist();
+  });
+  items.addEventListener("change",persist);
+})();
+  </script>
+
+  <script>
+    const source=document.getElementById("widget-source").textContent.trim();
+    const bookmarklet="javascript:"+encodeURIComponent(source);
+    const bookmark=document.getElementById("bookmark");
+    bookmark.href=bookmarklet;
+    document.getElementById("console-code").value=source;
+    const showCopied=message=>{const el=document.getElementById("copied");el.textContent=message;setTimeout(()=>el.textContent="",2400);};
+    document.getElementById("copy-bookmarklet").addEventListener("click",async()=>{
+      await navigator.clipboard.writeText(bookmarklet); showCopied("Bookmarklet-Adresse kopiert.");
+    });
+    document.getElementById("copy-code").addEventListener("click",async()=>{
+      await navigator.clipboard.writeText(source); showCopied("Konsolencode kopiert.");
+    });
+  </script>
+</body>
+</html>

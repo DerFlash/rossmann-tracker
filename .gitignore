@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+config.json
+data/
+browser-data/
+node_modules/
+upload/
+backups/
+exports/
+*.log
+.DS_Store

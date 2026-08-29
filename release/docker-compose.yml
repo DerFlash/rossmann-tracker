@@ -1,0 +1,55 @@
+services:
+  tracker:
+    image: "${ROSSMANN_TRACKER_IMAGE:-ghcr.io/derflash/rossmann-tracker:stable}"
+    container_name: rossmann-store-tracker
+    restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      BROWSER_HEADLESS: "false"
+      CHROME_DEBUG_PORT: "${CHROME_DEBUG_PORT:-9222}"
+    volumes:
+      - ./data:/app/data
+      - ./browser-data:/app/browser-data
+    ports:
+      - "127.0.0.1:8787:8787"
+    tmpfs:
+      - /tmp:size=1g,mode=1777
+    shm_size: "1gb"
+    stop_grace_period: 45s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  backup:
+    profiles: ["tools"]
+    image: "${ROSSMANN_TRACKER_IMAGE:-ghcr.io/derflash/rossmann-tracker:stable}"
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    network_mode: none
+    entrypoint: ["node", "src/installation-backup.js"]
+    command: ["create"]
+    environment:
+      DATA_DIR: /app/data
+      BROWSER_DATA_DIR: /app/browser-data
+      BACKUP_DIR: /app/backups
+    volumes:
+      - ./data:/app/data:ro
+      - ./browser-data:/app/browser-data:ro
+      - ./backups:/app/backups
+    tmpfs:
+      - /tmp:size=64m,mode=1777
