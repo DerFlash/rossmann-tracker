@@ -68,7 +68,7 @@ Weiterführende Informationen werden versioniert im Verzeichnis [`docs/`](docs/)
 
 Mehr zum inoffiziellen und nichtkommerziellen Charakter des Projekts steht auf der Seite [Über den Rossmann Store Tracker](docs/about.md). Die geplanten Schritte bis zur öffentlichen Bereitstellung sind im [Veröffentlichungsfahrplan](ROADMAP.md) festgehalten.
 
-Die freiwillige [WhatsApp-Community „Rossmann Store Tracker – Hilfe & Austausch“](https://chat.whatsapp.com/ELMb90gBK1cGDPbKX3eKZ1) ist ein optionales, von der Anwendung unabhängiges Angebot über den externen Dienst WhatsApp/Meta; es gelten dessen Nutzungs- und Datenschutzbestimmungen. Dort können sich Nutzer informell bei Einrichtung, Betrieb, DANs und Bestandsmeldungen helfen. Die Community ist kein garantierter oder offizieller Supportkanal. Nachvollziehbare Fehlerberichte gehören in die [GitHub Issues](https://github.com/DerFlash/rossmann-tracker/issues), allgemeine Fragen und Ideen in die [GitHub Discussions](https://github.com/DerFlash/rossmann-tracker/discussions).
+💬 In der [WhatsApp-Community „Rossmann Store Tracker – Hilfe & Austausch“](https://chat.whatsapp.com/ELMb90gBK1cGDPbKX3eKZ1) könnt ihr euch zum Tracker austauschen und gegenseitig unterstützen.
 
 Dieses rein private Hobbyprojekt wird kostenlos und nichtkommerziell bereitgestellt. Wenn es dir hilft, kannst du meine Arbeit freiwillig über [Ko-fi](https://ko-fi.com/derflash) unterstützen. Die Unterstützung ist ein optionales persönliches Dankeschön und **keine Spende im steuer- oder gemeinnützigkeitsrechtlichen Sinn**. Sie vermittelt weder Gegenleistung noch zusätzliche Funktionen, Nutzungsrechte oder bevorzugten Support.
 
