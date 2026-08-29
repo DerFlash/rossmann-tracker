@@ -258,6 +258,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.validate.outputs.tag }}
         run: |
+          cp release/.env.example "$RUNNER_TEMP/default.env.example"
           gh release create "$RELEASE_TAG" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
@@ -265,5 +266,5 @@ jobs:
             --generate-notes \
             --latest \
             release/docker-compose.yml \
-            release/.env.example \
+            "$RUNNER_TEMP/default.env.example" \
             release/UPDATE.md
