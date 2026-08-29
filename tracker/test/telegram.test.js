@@ -190,6 +190,73 @@ test("verarbeitet autorisierte Slash-Commands und registriert die Befehlsliste",
   }
 });
 
+test("verarbeitet ein Update nach fehlgeschlagenem Offset-Speichern nicht doppelt", async () => {
+  const originalFetch = globalThis.fetch;
+  let getUpdatesCount = 0;
+  const seenOffsets = [];
+  let sendMessageCount = 0;
+  let saveAttempts = 0;
+  globalThis.fetch = async (url, options) => {
+    const method = new URL(url).pathname.split("/").at(-1);
+    const body = options.body ? JSON.parse(options.body) : null;
+    if (method === "getUpdates") {
+      getUpdatesCount += 1;
+      seenOffsets.push(body?.offset ?? 0);
+      if ((body?.offset ?? 0) < 42) {
+        return new Response(JSON.stringify({
+          ok: true,
+          result: [{ update_id: 41, message: { chat: { id: 123 }, text: "/status" } }],
+        }), { status: 200, headers: { "content-type": "application/json" } });
+      }
+      return new Promise((_resolve, reject) => {
+        const abort = () => reject(new DOMException("aborted", "AbortError"));
+        if (options.signal?.aborted) abort();
+        else options.signal?.addEventListener("abort", abort, { once: true });
+      });
+    }
+    if (method === "sendMessage") sendMessageCount += 1;
+    return new Response(JSON.stringify({ ok: true, result: true }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  const bot = createTelegramBot({
+    getCredentials: () => ({ botToken: "token", chatId: "123" }),
+    getStatus: () => ({
+      running: false,
+      lastRunFinishedAt: null,
+      nextRunAt: null,
+      lastError: null,
+      results: [],
+      configuration: { trackingPaused: false, searchAreas: [], stores: [], products: [] },
+    }),
+    getLogs: () => [],
+    getSettings: () => ({ config: { stores: [], products: [], notifications: {} }, catalog: [] }),
+    updateConfig: async () => {},
+    triggerCheck: () => ({ accepted: true }),
+    lookupStores: async () => [],
+    resetBaseline: async () => ({ removed: 0 }),
+    loadOffset: async () => 0,
+    saveOffset: async () => {
+      saveAttempts += 1;
+      if (saveAttempts === 1) throw new Error("disk temporarily unavailable");
+    },
+    log: () => {},
+  });
+
+  try {
+    await bot.start();
+    await waitFor(() => saveAttempts >= 1 && sendMessageCount > 0, 2_000);
+    await waitFor(() => seenOffsets.some((value) => value >= 42), 7_000);
+    assert.ok(getUpdatesCount >= 2);
+    assert.equal(sendMessageCount, 1);
+  } finally {
+    await bot.stop();
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("ignoriert Befehle aus einer fremden Chat-ID", async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];

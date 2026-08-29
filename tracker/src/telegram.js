@@ -660,9 +660,9 @@ export function createTelegramBot({
           await processUpdate(update);
           if (stopped || suspended || lifecycleGeneration !== batchGeneration) break;
           const nextOffset = Number(update.update_id) + 1;
+          offset = nextOffset;
           await saveOffset(nextOffset);
           if (stopped || suspended || lifecycleGeneration !== batchGeneration) break;
-          offset = nextOffset;
         }
         lastFailure = null;
       } catch (error) {
