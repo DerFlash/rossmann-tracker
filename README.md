@@ -82,6 +82,10 @@ Die ausführliche Dokumentation liegt versioniert unter [`docs/`](docs/). Für E
 
 Die Installation aus dem Quellcode ist **nur für Entwicklung oder eigene lokale Builds** gedacht. Normale Nutzer sollten den oben beschriebenen Release-Weg verwenden.
 
+```bash
+git clone https://github.com/Level42-dev/rossmann-tracker.git
+```
+
 ➡️ [Quellinstallation und technische Betriebsdetails](docs/docker-tracker.md#installation-aus-dem-quellcode)
 
 ## Projekt und Unterstützung
