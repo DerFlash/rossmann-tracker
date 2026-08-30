@@ -11,7 +11,7 @@ Der Tracker stellt seine Build-Metadaten ohne lokale Konfigurations- oder Nutzun
 ```json
 {
   "build": {
-    "version": "0.4.0",
+    "version": "0.4.1",
     "revision": "development",
     "builtAt": null,
     "channel": "stable"
@@ -97,12 +97,12 @@ docker compose up -d
 
 Compose lädt `ghcr.io/level42-dev/rossmann-tracker:stable` beim ersten Start automatisch. Ein separates `docker pull` ist nicht erforderlich. Die Weboberfläche ist danach unter <http://127.0.0.1:8787> erreichbar.
 
-Die GHCR-Paketansicht kann zusätzlich einen von der Build-Attestation erzeugten Eintrag mit einem Namen wie `sha256-…` hervorheben. Dieser Eintrag dokumentiert die Build-Provenienz und ist kein unterstützter Laufzeittag. Für Installationen werden ausschließlich `stable` oder ein konkreter Versionstag wie `0.4.0` verwendet.
+Die GHCR-Paketansicht kann zusätzlich einen von der Build-Attestation erzeugten Eintrag mit einem Namen wie `sha256-…` hervorheben. Dieser Eintrag dokumentiert die Build-Provenienz und ist kein unterstützter Laufzeittag. Für Installationen werden ausschließlich `stable` oder ein konkreter Versionstag wie `0.4.1` verwendet.
 
 Wer eine Version unveränderlich festhalten möchte, lädt die optionale Release-Datei `default.env.example`, speichert sie als `.env` und setzt darin beispielsweise:
 
 ```text
-ROSSMANN_TRACKER_IMAGE=ghcr.io/level42-dev/rossmann-tracker:0.4.0
+ROSSMANN_TRACKER_IMAGE=ghcr.io/level42-dev/rossmann-tracker:0.4.1
 ```
 
 Vor einem Update wird der laufende Tracker gestoppt und über den netzwerkisolierten Compose-Dienst `backup` gesichert. Er liest die persistenten Verzeichnisse nur lesend und schreibt einen atomar fertiggestellten Snapshot samt Version und Schemastand nach `backups/`. Erst nach erfolgreicher Sicherung wird das neue Image geladen:
