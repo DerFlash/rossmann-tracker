@@ -1,121 +1,178 @@
-# Docker-Tracker
+# 🤖 Automatischer Tracker
 
-Der Docker-Teil des **Rossmann Store Trackers** prüft ausgewählte Rossmann-Produkte regelmäßig, speichert Bestandsänderungen lokal und kann über Telegram benachrichtigen.
+Der **automatische Tracker** ist für die dauerhafte Überwachung gedacht. Er prüft ausgewählte Rossmann-Produkte und Filialen regelmäßig, speichert Bestandsänderungen lokal und meldet gewünschte Änderungen per Telegram.
 
-## Voraussetzungen
+Wenn du nur spontan nach einem Bestand schauen möchtest, starte stattdessen mit dem [⚡ aktiven Bestands-Check](bookmarklet.md).
 
-- Docker Engine mit Docker Compose 2.24 oder neuer oder eine aktuelle Version von Docker Desktop
-- Zugriff auf die lokale Weboberfläche
-- optional ein eigener Telegram-Bot für Benachrichtigungen
+## Das brauchst du
 
-Das veröffentlichte Image unterstützt **linux/amd64** und **linux/arm64**. Weitere Mindestversionen werden pro Release in den Release Notes genannt.
+Für die empfohlene Installation benötigst du nur:
 
-## Empfohlene Installation aus dem Release
+- **Docker Desktop** oder Docker Engine mit Docker Compose **2.24 oder neuer**,
+- einen Browser für die lokale Weboberfläche,
+- einen eigenen **Telegram-Bot** für die geführte Ersteinrichtung.
 
-Die Release-Compose-Datei startet das fertig gebaute öffentliche Image aus der GitHub Container Registry. Git, Node.js, ein lokaler Build und ein GitHub-Login sind dafür nicht erforderlich.
+Git, Node.js und ein GitHub-Login sind für den normalen Release-Weg **nicht erforderlich**.
+
+Das veröffentlichte Image unterstützt `linux/amd64` und `linux/arm64`.
+
+## 1. Docker installieren und Tracker starten
+
+![Docker-Tracker starten](assets/tracker-start.svg)
+
+Installiere und starte zunächst Docker Desktop. Öffne danach ein Terminal.
 
 ### macOS und Linux
 
-~~~bash
+```bash
 mkdir -p rossmann-tracker
 cd rossmann-tracker
 curl -fL -o docker-compose.yml \
   https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml
 docker compose up -d
-~~~
+```
 
 ### Windows PowerShell
 
-~~~powershell
+```powershell
 New-Item -ItemType Directory -Force rossmann-tracker
 Set-Location rossmann-tracker
 Invoke-WebRequest -Uri "https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
 docker compose up -d
-~~~
+```
 
-Compose lädt `ghcr.io/level42-dev/rossmann-tracker:stable` beim ersten Start automatisch. Ein vorheriges `docker pull` ist nicht notwendig. Die Weboberfläche ist anschließend unter <http://127.0.0.1:8787> erreichbar; der Port ist absichtlich nur an die lokale Loopback-Adresse gebunden.
+Compose lädt das öffentliche Image `ghcr.io/level42-dev/rossmann-tracker:stable` automatisch. Ein separates `docker pull` ist nicht erforderlich.
 
-## Installation aus dem Quellcode
+## 2. Weboberfläche öffnen
 
-Wer den aktuellen Quellstand lokal bauen oder am Projekt entwickeln möchte, verwendet die Root-Compose-Datei des Repositorys:
+Öffne anschließend im Browser:
 
-~~~bash
-git clone https://github.com/Level42-dev/rossmann-tracker.git
-cd rossmann-tracker
-docker compose up -d --build
-docker compose logs -f tracker
-~~~
+<http://127.0.0.1:8787>
 
-Diese Variante baut das Image lokal über `build: .`. Sie ist nicht der empfohlene Installationsweg für normale Nutzer und darf nicht mit der Release-Compose-Datei vermischt werden.
+Der Dienst ist absichtlich nur an `127.0.0.1` gebunden und damit standardmäßig nur lokal auf dem Rechner erreichbar.
 
-## Ersteinrichtung
+## 3. Geführte Ersteinrichtung
 
-Die Weboberfläche führt nacheinander durch:
+![Geführte Ersteinrichtung des Trackers](assets/tracker-setup.svg)
 
-1. auf Wunsch einen eigenen Telegram-Bot verbinden,
-2. PLZ-Suchgebiet oder konkrete Filialen auswählen,
-3. mindestens ein Katalogprodukt aktivieren.
+Die Weboberfläche führt eine frische Installation durch drei Schritte:
 
-Eine frische Installation enthält keine persönliche PLZ, Filiale, Produktauswahl, Chat-ID oder Zugangsdaten.
+1. **Telegram verbinden**
+2. **Suchgebiet oder konkrete Filiale auswählen**
+3. **mindestens ein Produkt aus dem Katalog aktivieren**
+
+### Telegram verbinden
+
+1. Öffne **@BotFather** in Telegram.
+2. Sende `/newbot`.
+3. Vergib einen Namen und einen Benutzernamen für deinen Bot.
+4. Kopiere den von BotFather ausgegebenen Bot-Token in die Weboberfläche.
+5. Folge der angezeigten Kopplung, damit der Tracker deine Chat-ID erhält.
+
+> [!IMPORTANT]
+> In der aktuellen geführten Ersteinrichtung gehört Telegram zum Setup. Der Tracker wechselt erst ins vollständige Dashboard, wenn Telegram, Standort und mindestens ein Produkt eingerichtet sind.
+
+Weitere Details stehen unter [Telegram](telegram.md).
+
+### Filiale oder Suchgebiet wählen
+
+Gib eine PLZ ein. Rossmann liefert dazu ein Suchgebiet mit mehreren Filialen. Du kannst entweder:
+
+- **alle gelieferten Filialen im Umkreis** überwachen oder
+- die Überwachung auf **eine konkrete Filiale** begrenzen.
+
+### Produkte auswählen
+
+Neue Installationen starten ohne aktive Produktauswahl. Wähle mindestens ein Produkt aus dem mitgelieferten Katalog aus. Produkte ohne bekannte DAN werden informativ angezeigt, können aber noch nicht überwacht werden.
+
+## 4. Danach läuft der Tracker automatisch
+
+Im Dashboard kannst du unter anderem:
+
+- den aktuellen Tracker-Status ansehen,
+- standardmäßig nur verfügbare Ergebnisse anzeigen,
+- manuell **Jetzt prüfen** auslösen,
+- das Tracking pausieren,
+- Suchgebiete und Filialen ändern,
+- Produkte aktivieren oder entfernen,
+- Benachrichtigungsarten konfigurieren,
+- Bestandsverläufe nach Filiale, Produkt und Zeitraum auswerten,
+- Logs einsehen.
+
+Automatische Prüfungen laufen frühestens alle **5 Minuten**. Einzelne Rossmann-Abfragen haben mindestens **2 Sekunden Abstand** plus Zufallsverzögerung.
 
 ## Persistente Daten
 
-Die Compose-Datei bindet zwei lokale Verzeichnisse ein:
+Die Compose-Datei bindet lokale Verzeichnisse ein:
 
-- **data/**: Einstellungen, Telegram-Kopplung, letzter Zustand und Bestandsverlauf
-- **browser-data/**: lokales Chromium-Profil für Rossmanns Client-Challenge
+- **`data/`** – Einstellungen, Telegram-Kopplung, letzter Zustand und Bestandsverlauf
+- **`browser-data/`** – lokales Chromium-Profil für Rossmanns Client-Challenge
 
-Beide Verzeichnisse sind von Git und vom Docker-Build-Kontext ausgeschlossen. Vor einer Sicherung sollte der Container gestoppt werden. Die Dateien dürfen nicht veröffentlicht oder einem Fehlerbericht ungeprüft beigefügt werden.
-
-Die Compose-Dateien enthalten dafür einen nur bei Bedarf gestarteten Sicherungsdienst. Er besitzt keinen Netzwerkzugriff, liest `data/` und `browser-data/` nur lesend und schreibt einen vollständigen Snapshot mit Manifest nach `backups/`:
-
-~~~bash
-docker compose stop tracker
-docker compose run --rm backup
-docker compose start tracker
-~~~
-
-Schlägt der Sicherungslauf fehl, darf das Update nicht fortgesetzt werden. `backups/` ist ebenfalls von Git und Docker-Builds ausgeschlossen und muss wie die beiden Quelldatenverzeichnisse vertraulich behandelt werden.
+Beide Verzeichnisse sind von Git und vom Docker-Buildkontext ausgeschlossen und sollten nicht veröffentlicht oder ungeprüft an Fehlerberichte angehängt werden.
 
 ## Betrieb
 
-~~~bash
+```bash
 docker compose ps
 docker compose logs -f tracker
 docker compose restart tracker
-~~~
+```
 
 Der Container benötigt keinen Docker-Socket und keine weitreichenden Host-Rechte. Einstellungen werden über die lokale Weboberfläche geändert.
 
+## Sicherung vor Updates
+
+Vor einer Sicherung sollte der Container gestoppt werden. Die Compose-Dateien enthalten einen nur bei Bedarf gestarteten Sicherungsdienst ohne Netzwerkzugriff:
+
+```bash
+docker compose stop tracker
+docker compose run --rm backup
+docker compose start tracker
+```
+
+Der Snapshot wird mit Manifest unter `backups/` abgelegt. Schlägt der Sicherungslauf fehl, sollte das Update nicht fortgesetzt werden.
+
 ## Manuelles Update einer Release-Installation
 
-Die empfohlene Release-Installation verwendet das veröffentlichte GHCR-Image. Vor dem Update wird der laufende Tracker konsistent gesichert:
-
-~~~bash
+```bash
 docker compose config --quiet
 docker compose stop tracker
 docker compose run --rm backup
 docker compose start tracker
 docker compose pull
 docker compose up -d
-~~~
+```
 
-Das Release enthält zusätzlich `UPDATE.md` mit dem vollständigen Vorprüfungs- und Rollbackablauf. Die optionale Datei `default.env.example` kann als Vorlage heruntergeladen und bei Bedarf als `.env` gespeichert werden.
+Das Release enthält zusätzlich `UPDATE.md` mit Vorprüfung und Rollbackablauf.
+
+## Installation aus dem Quellcode
+
+> [!NOTE]
+> Dieser Weg ist für Entwicklung oder eigene lokale Builds gedacht, nicht für normale Nutzer.
+
+```bash
+git clone https://github.com/Level42-dev/rossmann-tracker.git
+cd rossmann-tracker
+docker compose up -d --build
+docker compose logs -f tracker
+```
+
+Diese Variante baut das Image lokal über `build: .`. Sie ist vom Release-Weg getrennt; die beiden Compose-Dateien dürfen nicht miteinander vermischt werden.
 
 ## Manuelles Update einer Quellinstallation
 
-Wer das Repository geklont hat, verwendet die Root-Compose-Datei mit **build: .**. Diese Installation wird aus dem Quellstand aktualisiert:
-
-~~~bash
+```bash
 git pull --ff-only
 docker compose config --quiet
 docker compose stop tracker
 docker compose run --rm backup
 docker compose up -d --build
-~~~
+```
 
-Persistente Verzeichnisse bleiben bei beiden Wegen erhalten. Der Tracker-Container läuft mit schreibgeschütztem Root-Dateisystem, ohne zusätzliche Linux-Capabilities und ohne Docker-Socket; beschreibbar bleiben nur die ausdrücklich eingebundenen Laufzeitverzeichnisse und temporärer Speicher. Die beiden Compose-Dateien dürfen nicht vermischt werden. Hinweise zu Versionstags, Rollback und Release-Artefakten stehen unter [Versionen und Releases](releases.md).
+Persistente Verzeichnisse bleiben bei beiden Wegen erhalten. Hinweise zu Versionstags, Rollback und Release-Artefakten stehen unter [Versionen und Releases](releases.md).
 
 ## Einmalige Namensumstellung
 
-Private Entwicklungsinstallationen vor der Umbenennung verwendeten den festen Container-Namen **rossmann-dan-tracker**. Der öffentliche Name lautet **rossmann-store-tracker**. Falls Docker beim ersten Aktualisieren beide Container meldet, den alten Compose-Stand zuerst mit **docker compose down** beenden und danach den aktuellen Stand neu starten. Die eingebundenen Verzeichnisse **data/** und **browser-data/** werden dadurch nicht gelöscht.
+Private Entwicklungsinstallationen vor der Umbenennung verwendeten den festen Container-Namen **rossmann-dan-tracker**. Der öffentliche Name lautet **rossmann-store-tracker**.
+
+Falls Docker beim ersten Aktualisieren beide Container meldet, den alten Compose-Stand zuerst mit `docker compose down` beenden und danach den aktuellen Stand neu starten. Die eingebundenen Verzeichnisse `data/` und `browser-data/` werden dadurch nicht gelöscht.
