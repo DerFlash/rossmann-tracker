@@ -20,7 +20,7 @@ Die Release-Compose-Datei startet das fertig gebaute öffentliche Image aus der 
 mkdir -p rossmann-tracker
 cd rossmann-tracker
 curl -fL -o docker-compose.yml \
-  https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml
+  https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml
 docker compose up -d
 ~~~
 
@@ -29,18 +29,18 @@ docker compose up -d
 ~~~powershell
 New-Item -ItemType Directory -Force rossmann-tracker
 Set-Location rossmann-tracker
-Invoke-WebRequest -Uri "https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
+Invoke-WebRequest -Uri "https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
 docker compose up -d
 ~~~
 
-Compose lädt `ghcr.io/derflash/rossmann-tracker:stable` beim ersten Start automatisch. Ein vorheriges `docker pull` ist nicht notwendig. Die Weboberfläche ist anschließend unter <http://127.0.0.1:8787> erreichbar; der Port ist absichtlich nur an die lokale Loopback-Adresse gebunden.
+Compose lädt `ghcr.io/level42-dev/rossmann-tracker:stable` beim ersten Start automatisch. Ein vorheriges `docker pull` ist nicht notwendig. Die Weboberfläche ist anschließend unter <http://127.0.0.1:8787> erreichbar; der Port ist absichtlich nur an die lokale Loopback-Adresse gebunden.
 
 ## Installation aus dem Quellcode
 
 Wer den aktuellen Quellstand lokal bauen oder am Projekt entwickeln möchte, verwendet die Root-Compose-Datei des Repositorys:
 
 ~~~bash
-git clone https://github.com/DerFlash/rossmann-tracker.git
+git clone https://github.com/Level42-dev/rossmann-tracker.git
 cd rossmann-tracker
 docker compose up -d --build
 docker compose logs -f tracker
