@@ -2,11 +2,18 @@
 
 Diese Dokumentation gehört zum versionierten Quellstand des **Rossmann Store Trackers**. Änderungen an Verhalten, Installation oder Datenformaten werden zusammen mit dem Code geprüft.
 
+## Einstieg
+
 | Thema | Inhalt |
 | --- | --- |
-| [Docker-Tracker](docker-tracker.md) | Installation, Betrieb und manuelle Aktualisierung |
+| [⚡ Aktiver Bestands-Check](bookmarklet.md) | bebilderte Installation und Bedienung ohne Docker |
+| [🤖 Automatischer Tracker](docker-tracker.md) | bebilderte Docker-Installation, Ersteinrichtung und Betrieb |
+
+## Weitere Themen
+
+| Thema | Inhalt |
+| --- | --- |
 | [Telegram](telegram.md) | Bot-Kopplung, Befehle und Benachrichtigungen |
-| [Bookmarklet](bookmarklet.md) | Installation, Bedienung und lokale Speicherung |
 | [Konfiguration und Daten](configuration-and-data.md) | Einstellungen, Persistenz, History und Datensicherung |
 | [Fehlerbehebung](troubleshooting.md) | Diagnose und sicherer Umgang mit Debugdaten |
 | [Produktkatalog und DANs](product-catalog.md) | Katalogformat, Statuswerte und Beiträge |
