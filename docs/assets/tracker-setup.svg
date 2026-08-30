@@ -19,5 +19,5 @@
 <text x="285" y="501" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="16" fill="#4f4845">3. Danach Filiale und Produkte auswählen</text>
 <rect x="270" y="535" width="510" height="48" rx="10" fill="#fff" stroke="#cfc4bf"/><text x="288" y="565" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" fill="#8d8582">123456789:AA...</text>
 <rect x="800" y="535" width="120" height="48" rx="11" fill="#cf1532"/><text x="831" y="565" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="15" font-weight="800" fill="#fff">Weiter</text>
-<rect x="270" y="610" width="650" height="32" rx="10" fill="#e4f5ed"/><text x="290" y="632" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="14" font-weight="750" fill="#16734b">Telegram ist optional – der Tracker funktioniert auch nur mit Weboberfläche und History.</text>
+<rect x="270" y="610" width="650" height="32" rx="10" fill="#e4f5ed"/><text x="290" y="632" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="14" font-weight="750" fill="#16734b">Telegram, Standort und mindestens ein Produkt gehören aktuell zur geführten Ersteinrichtung.</text>
 </svg>
