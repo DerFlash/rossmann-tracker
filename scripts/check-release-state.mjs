@@ -1,6 +1,7 @@
 import { pathToFileURL } from "node:url";
 import {
   assertVersionIsNewer,
+  OFFICIAL_RELEASE_ACTOR,
   OFFICIAL_REPOSITORY,
 } from "./prepare-release.mjs";
 
@@ -61,13 +62,13 @@ export async function checkReleaseState({
   fetchImpl = fetch,
 }) {
   if (!token) throw new Error("GH_TOKEN fehlt.");
-  if (repositoryOwner !== "DerFlash" || actor !== "DerFlash" || triggeringActor !== "DerFlash") {
+  if (repositoryOwner !== "Level42-dev" || actor !== OFFICIAL_RELEASE_ACTOR || triggeringActor !== OFFICIAL_RELEASE_ACTOR) {
     throw new Error("Nur DerFlash darf aus dem offiziellen Repository veröffentlichen.");
   }
 
   const repoPath = repositoryPath(repository);
   if (repoPath !== OFFICIAL_REPOSITORY) {
-    throw new Error("Stable-Releases sind nur im offiziellen DerFlash-Repository erlaubt.");
+    throw new Error("Stable-Releases sind nur im offiziellen Level42-dev-Repository erlaubt.");
   }
 
   const repositoryData = requireStatus(
