@@ -2,7 +2,7 @@
 
 **Inoffizieller Community-Tracker für Rossmann-Filialbestände**
 
-Filialbestände bei Rossmann prüfen, Änderungen verfolgen und auf Wunsch per Telegram benachrichtigt werden – lokal, kostenlos und inoffiziell.
+Rossmann-Bestände einfach prüfen: **spontan per Browser-Check** oder **automatisch im Hintergrund mit Verlauf und Telegram-Benachrichtigungen**.
 
 > [!TIP]
 > **💬 WhatsApp-Community**
@@ -12,87 +12,91 @@ Filialbestände bei Rossmann prüfen, Änderungen verfolgen und auf Wunsch per T
 > [!IMPORTANT]
 > Angezeigte Werte sind Buchbestände und können vom tatsächlichen Regalbestand abweichen. Das Projekt ist unabhängig von der Dirk Rossmann GmbH und wird von ihr weder angeboten noch unterstützt.
 
-## Welche Variante passt zu mir?
+---
 
-| Variante | Geeignet für | Einstieg |
-| --- | --- | --- |
-| **Docker-Tracker** | automatische Prüfungen, Bestandsverlauf und Telegram-Benachrichtigungen | [Schnellstart](#docker-tracker-schnellstart) |
-| **Browser-Bookmarklet** | spontane Einzelprüfungen ohne dauerhaft laufenden Dienst | [Installation](#bookmarklet-installieren) |
+## 🚀 Start hier
+
+### ⚡ 1. Aktiver Bestands-Check – am einfachsten zum Ausprobieren
+
+**Du willst jetzt kurz prüfen, ob ein Produkt in Rossmann-Filialen in deiner Nähe Bestand hat? Dann nimm diese Variante.**
+
+Kein Docker, kein GitHub-Login und keine Kommandozeile: Ein kleines **Bookmarklet** wird einmal als Browser-Favorit gespeichert und öffnet danach den Bestands-Check direkt auf `rossmann.de`.
+
+1. [`rossmann-dan-bookmarklet.html`](rossmann-dan-bookmarklet.html) herunterladen und öffnen.
+2. Den roten Button **Rossmann Store Tracker** in die Favoriten-/Lesezeichenleiste ziehen.
+3. Den neuen Favoriten anklicken, PLZ prüfen und **Bestand prüfen** wählen.
+
+➡️ **[Bebilderte Schritt-für-Schritt-Anleitung zum aktiven Bestands-Check](docs/bookmarklet.md)**
+
+---
+
+### 🤖 2. Automatischer Tracker – überwacht für dich
+
+**Du möchtest ausgewählte Produkte und Filialen regelmäßig überwachen und bei Änderungen benachrichtigt werden? Dann ist der Docker-Tracker die richtige Variante.**
+
+Er läuft lokal auf deinem Rechner oder Server, speichert Bestandsverläufe und kann Restocks, Ausverkäufe und andere Änderungen per Telegram melden. Für die normale Installation brauchst du im Wesentlichen **Docker Desktop / Docker Compose**; Git und Node.js sind nicht erforderlich.
+
+➡️ **[Bebilderte Installation und Ersteinrichtung des automatischen Trackers](docs/docker-tracker.md)**
+
+### Welche Variante passt zu mir?
+
+| Du möchtest … | Empfehlung |
+| --- | --- |
+| einmal schnell nach Bestand schauen | **⚡ Aktiver Bestands-Check** |
+| ohne technische Einrichtung starten | **⚡ Aktiver Bestands-Check** |
+| regelmäßig automatisch prüfen lassen | **🤖 Automatischer Tracker** |
+| Bestandsänderungen und Verlauf sehen | **🤖 Automatischer Tracker** |
+| Telegram-Benachrichtigungen erhalten | **🤖 Automatischer Tracker** |
+
+---
 
 ## Funktionen
 
-- mehrere Produkte und Rossmann-Filialen gleichzeitig überwachen
-- Filialauswahl per PLZ-Suchgebiet oder konkreter Filial-ID
+### Aktiver Bestands-Check
+
+- spontane Bestandsprüfung direkt auf `rossmann.de`
+- PLZ-Suchgebiet oder konkrete Filiale auswählen
+- mehrere Produkte/DANs in einem Durchlauf prüfen
+- PLZ, Produktliste und Filialauswahl lokal im Browser merken
+
+### Automatischer Tracker
+
+- mehrere Produkte und Rossmann-Filialen regelmäßig überwachen
 - Benachrichtigungen bei Restock, Ausverkauf und Bestandsänderungen
 - Bestandsverlauf mit Einzelprodukt-Graph und filialweiter Übersicht echter Zu- und Abgänge
 - Filter für Produkt, Filiale und Zeitraum
 - lokale Weboberfläche für Einrichtung, Konfiguration, Status und Logs
 - Telegram-Steuerung per Slash-Commands
-- JSON- und XML-Verarbeitung sowie Browser-Fallback bei abgewiesenen Direktabfragen
 - persistente Einstellungen und Bestände über Container-Neustarts hinweg
 
-## Docker-Tracker: Schnellstart
-
-Voraussetzung ist Docker Compose 2.24 oder neuer, beispielsweise über Docker Desktop. Für die normale Nutzung wird das fertige Stable-Release empfohlen; Git, Node.js und ein GitHub-Login sind nicht erforderlich.
-
-### macOS und Linux
-
-```bash
-mkdir -p rossmann-tracker
-cd rossmann-tracker
-curl -fL -o docker-compose.yml \
-  https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml
-docker compose up -d
-```
-
-### Windows PowerShell
-
-```powershell
-New-Item -ItemType Directory -Force rossmann-tracker
-Set-Location rossmann-tracker
-Invoke-WebRequest -Uri "https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
-docker compose up -d
-```
-
-Danach die Weboberfläche unter <http://127.0.0.1:8787> öffnen. Die geführte Ersteinrichtung richtet auf Wunsch Telegram ein, wählt Filialen und aktiviert Produkte. Eine `.env`- oder `config.json`-Datei ist für neue Installationen nicht erforderlich.
-
-Compose lädt das öffentliche Image `ghcr.io/level42-dev/rossmann-tracker:stable` automatisch. Ein separates `docker pull` ist bei der Erstinstallation nicht nötig. Der Dienst ist ausschließlich an `127.0.0.1` gebunden; Einstellungen, Zustand und Browserprofil werden lokal in `data/` und `browser-data/` gespeichert.
-
-## Installation aus dem Quellcode
-
-Wer den aktuellen Quellstand lokal bauen oder am Projekt entwickeln möchte, verwendet stattdessen die Compose-Datei aus dem Repository:
-
-```bash
-git clone https://github.com/Level42-dev/rossmann-tracker.git
-cd rossmann-tracker
-docker compose up -d --build
-docker compose logs -f tracker
-```
-
-Diese Quellinstallation baut das Image lokal und ist vom oben empfohlenen Release-Weg getrennt. Die beiden Compose-Dateien dürfen nicht miteinander vermischt werden.
-
-## Bookmarklet installieren
-
-1. [`rossmann-dan-bookmarklet.html`](rossmann-dan-bookmarklet.html) herunterladen und lokal öffnen.
-2. Den roten Button **Rossmann Store Tracker** in die Lesezeichen- oder Favoritenleiste ziehen.
-3. Das Lesezeichen anklicken. Falls noch keine Rossmann-Seite geöffnet ist, leitet es zunächst dorthin weiter.
-
-Nach einem Bookmarklet-Update muss das bisherige Lesezeichen ersetzt werden.
+---
 
 ## Dokumentation
 
-Weiterführende Informationen werden versioniert im Verzeichnis [`docs/`](docs/) gepflegt:
+Die ausführliche Dokumentation liegt versioniert unter [`docs/`](docs/). Für Einsteiger sind diese beiden Seiten der beste Start:
 
 | Thema | Inhalt |
 | --- | --- |
-| [Docker-Tracker](docs/docker-tracker.md) | Installation, Aktualisierung und Betrieb |
+| [⚡ Aktiver Bestands-Check](docs/bookmarklet.md) | bebilderte Installation und erste Bestandsprüfung |
+| [🤖 Automatischer Tracker](docs/docker-tracker.md) | bebilderte Docker-Installation und Ersteinrichtung |
 | [Telegram](docs/telegram.md) | Kopplung, Befehle und Benachrichtigungslogik |
-| [Bookmarklet](docs/bookmarklet.md) | Installation, Bedienung und lokale Speicherung |
 | [Konfiguration und Daten](docs/configuration-and-data.md) | Einstellungen, Suchgebiete, Zustand und History |
 | [Fehlerbehebung](docs/troubleshooting.md) | Diagnose, Debug-Dateien und bekannte Sonderfälle |
 | [Produktkatalog und DANs](docs/product-catalog.md) | Katalogpflege, Eingabeformat und Produktstatus |
 | [Versionen und Build-Metadaten](docs/releases.md) | Semantische Versionierung, reproduzierbare Installation und Release-Buildwerte |
 | [Saubere Veröffentlichungsgrenze](docs/publication-boundary.md) | Übergang vom privaten Entwicklungsarchiv zum geprüften öffentlichen Repository |
+
+## Installation aus dem Quellcode
+
+Die Installation aus dem Quellcode ist **nur für Entwicklung oder eigene lokale Builds** gedacht. Normale Nutzer sollten den oben beschriebenen Release-Weg verwenden.
+
+```bash
+git clone https://github.com/Level42-dev/rossmann-tracker.git
+```
+
+➡️ [Quellinstallation und technische Betriebsdetails](docs/docker-tracker.md#installation-aus-dem-quellcode)
+
+---
 
 ## Projekt und Unterstützung
 
@@ -106,10 +110,12 @@ Der Rossmann Store Tracker ist **source-available und kein klassisches Open-Sour
 
 Maßgeblich sind [`LICENSE.md`](LICENSE.md) und [`CONTRIBUTING.md`](CONTRIBUTING.md). Pull Requests erfordern die ausdrückliche Zustimmung zum [`Contributor Grant`](CONTRIBUTOR_LICENSE_AGREEMENT.md). Der dokumentierte [Best-Effort-Veröffentlichungscheck](docs/legal-review.md) ist keine Rechtsberatung oder externe juristische Freigabe und nennt die verbleibenden Risiken und offenen Freigabepunkte.
 
+---
+
 ## Projektstruktur
 
 ```text
-rossmann-dan-bookmarklet.html   Bookmarklet-Installer
+rossmann-dan-bookmarklet.html   Installer für den aktiven Bestands-Check
 products.json                  gemeinsamer Produkt- und DAN-Katalog
 docker-compose.yml             lokaler Docker-Betrieb
 tracker/

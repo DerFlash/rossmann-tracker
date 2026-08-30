@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+<title id="title">Docker Tracker starten</title>
+<desc id="desc">Illustration mit Docker Desktop, Schnellstartbefehlen und lokaler Weboberfläche unter 127.0.0.1:8787.</desc>
+<defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#c8192e"/></marker></defs>
+<rect width="1200" height="700" fill="#f5f1ed"/>
+<text x="70" y="62" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="30" font-weight="800" fill="#221f1d">Automatischer Tracker · einmal starten, danach im Browser einrichten</text>
+<rect x="70" y="110" width="300" height="460" rx="22" fill="#fff" stroke="#e5ddd6"/>
+<circle cx="220" cy="215" r="62" fill="#e7f2ff"/><text x="168" y="224" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="22" font-weight="850" fill="#1967a3">Docker</text>
+<text x="118" y="318" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="22" font-weight="800" fill="#221f1d">1. Docker Desktop</text>
+<text x="118" y="352" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="16" fill="#746c69">installieren und starten.</text>
+<rect x="440" y="110" width="690" height="220" rx="22" fill="#171515"/>
+<text x="470" y="152" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" fill="#9aa1a8">Terminal</text>
+<text x="470" y="194" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" fill="#ffffff">mkdir -p rossmann-tracker &amp;&amp; cd rossmann-tracker</text>
+<text x="470" y="230" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" fill="#ffffff">curl -fL -o docker-compose.yml \</text>
+<text x="492" y="258" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#ffffff">.../releases/latest/download/docker-compose.yml</text>
+<text x="470" y="294" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" fill="#ffffff">docker compose up -d</text>
+<text x="440" y="372" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="22" font-weight="800" fill="#221f1d">2. Schnellstart ausführen</text>
+<text x="440" y="406" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="16" fill="#746c69">Das fertige Image wird automatisch geladen.</text>
+<path d="M785 438 L785 500" fill="none" stroke="#c8192e" stroke-width="6" marker-end="url(#arrow)"/>
+<rect x="550" y="530" width="470" height="92" rx="18" fill="#fff" stroke="#ded5d1"/>
+<text x="585" y="566" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="18" font-weight="800" fill="#221f1d">3. Browser öffnen</text>
+<text x="585" y="598" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="20" fill="#c8192e">http://127.0.0.1:8787</text>
+</svg>
