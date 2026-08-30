@@ -38,7 +38,7 @@ curl -fsS http://127.0.0.1:8787/api/health
 In `.env` vorübergehend den letzten funktionierenden unveränderlichen Versionstag setzen:
 
 ```text
-ROSSMANN_TRACKER_IMAGE=ghcr.io/derflash/rossmann-tracker:<vorherige-version>
+ROSSMANN_TRACKER_IMAGE=ghcr.io/level42-dev/rossmann-tracker:<vorherige-version>
 ```
 
 Danach:
