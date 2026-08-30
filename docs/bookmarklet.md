@@ -1,26 +1,91 @@
-# Bookmarklet
+# ⚡ Aktiver Bestands-Check
 
-Das Bookmarklet ermöglicht spontane Bestandsprüfungen direkt auf **rossmann.de**, ohne einen dauerhaft laufenden Container.
+Der **aktive Bestands-Check** ist der einfachste Einstieg in den Rossmann Store Tracker. Er eignet sich für spontane Prüfungen direkt im Browser und benötigt **keinen Docker-Container, keinen GitHub-Login und keine dauerhaft laufende Software**.
 
-## Installation
+Technisch handelt es sich um ein **Bookmarklet**: ein Browser-Favorit, der auf `rossmann.de` ein kleines Bestands-Widget öffnet.
 
-1. [rossmann-dan-bookmarklet.html](../rossmann-dan-bookmarklet.html) herunterladen und lokal öffnen.
-2. Den Button **Rossmann Store Tracker** in die Lesezeichen- oder Favoritenleiste ziehen.
-3. Das Lesezeichen auf einer Rossmann-Seite anklicken.
+## Das brauchst du
 
-Wird es außerhalb von **rossmann.de** gestartet, öffnet es zunächst die Rossmann-Seite. Dort muss das Lesezeichen erneut angeklickt werden. Nach einem Update wird das alte Lesezeichen durch das neu erzeugte ersetzt.
+- einen Desktop-Browser mit Favoriten-/Lesezeichenleiste,
+- die Datei [`rossmann-dan-bookmarklet.html`](../rossmann-dan-bookmarklet.html),
+- eine PLZ für das gewünschte Rossmann-Suchgebiet.
 
-## Bedienung
+## 1. Bestands-Check installieren
 
-- eine fünfstellige PLZ eingeben,
-- optional konkrete Filialen aus den Rossmann-Treffern auswählen,
-- Produkte im Format **Name | DAN** oder nur als DAN eintragen,
-- **Bestand prüfen** starten.
+![Bookmarklet installieren](assets/bookmarklet-install.svg)
 
-Ohne konkrete Filialauswahl werden alle von Rossmann für die PLZ gelieferten Treffer ausgewertet.
+1. Öffne [`rossmann-dan-bookmarklet.html`](../rossmann-dan-bookmarklet.html) auf GitHub.
+2. Lade die Datei über **Download raw file** herunter und öffne sie lokal im Browser.
+3. Blende die Favoriten-/Lesezeichenleiste ein.
+   - **Safari:** `Darstellung → Favoritenleiste einblenden`
+   - **Chrome / Edge:** `⌘⇧B` auf macOS bzw. `Strg+Umschalt+B` unter Windows
+4. Ziehe den roten Button **Rossmann Store Tracker** in diese Leiste.
 
-## Lokale Speicherung
+Damit ist die Installation abgeschlossen. Es wird kein Programm installiert.
 
-PLZ, Produktliste und Filialauswahl liegen ausschließlich im Local Storage des Browsers. Das Bookmarklet sendet diese Angaben nur an die Rossmann-Filialsuche, die für die angeforderte Bestandsprüfung benötigt wird.
+> [!NOTE]
+> Nach einem Update des Bookmarklets muss der bisherige Favorit durch den neu erzeugten ersetzt werden.
 
-Browserdaten können über die Website-Einstellungen des Browsers gelöscht werden. Das Bookmarklet besitzt keine Verbindung zur Docker-Installation und übernimmt deren Konfiguration nicht.
+## 2. Bestands-Check öffnen
+
+Öffne eine beliebige Seite auf `rossmann.de` und klicke auf den Favoriten **Rossmann Store Tracker**.
+
+Wenn du den Favoriten auf einer anderen Website anklickst, öffnet das Bookmarklet zunächst `rossmann.de`. Klicke dort anschließend **noch einmal** auf den Favoriten.
+
+Danach erscheint rechts unten das rote **DAN**-Widget.
+
+## 3. Bestand prüfen
+
+![Bestand mit dem Bookmarklet prüfen](assets/bookmarklet-check.svg)
+
+1. Trage deine **fünfstellige PLZ** ein.
+2. Lass als Ziel **Alle Filialen im Umkreis** ausgewählt oder lade eine konkrete Filiale.
+3. Prüfe die Produktliste. Eine Zeile besteht aus `Name | DAN`; alternativ genügt auch nur die DAN.
+4. Klicke auf **Bestand prüfen**.
+
+Der Check zeigt die von Rossmann gelieferten Filialen und die gemeldeten Bestände je Produkt an.
+
+### Beispiel für eigene Produkte
+
+```text
+Erhabene Helden Booster Bundle | 228936
+Pokémon Day 2026 Kollektion | 214015
+228940
+```
+
+Die mitgelieferte Produktliste ist bereits vorbelegt und kann direkt verändert oder ergänzt werden.
+
+## Eine bestimmte Filiale prüfen
+
+Mit **Optionale Filialauswahl laden** fragt der Bestands-Check zunächst die von Rossmann zur PLZ gelieferten Filialen ab. Danach kannst du statt des gesamten Umkreises eine konkrete Filiale auswählen.
+
+Die gespeicherte Filialauswahl wird beim nächsten Öffnen wieder angeboten.
+
+## Was wird lokal gespeichert?
+
+Diese Angaben liegen ausschließlich im Local Storage deines Browsers:
+
+- PLZ,
+- Produkt-/DAN-Liste,
+- ausgewählte Filiale,
+- zuletzt geladene Filialen.
+
+Das Bookmarklet sendet diese Angaben nur an die Rossmann-Filialsuche, soweit sie für die angeforderte Bestandsprüfung benötigt werden. Es besitzt **keine Verbindung** zu einer Docker-Tracker-Installation.
+
+## Häufige Fragen
+
+### Der Favorit öffnet nur Rossmann, aber kein Widget
+
+Das ist normal, wenn du ihn außerhalb von `rossmann.de` gestartet hast. Klicke den Favoriten auf der geöffneten Rossmann-Seite ein zweites Mal an.
+
+### Ich sehe den roten Button nicht in meiner Favoritenleiste
+
+Prüfe, ob die Favoriten-/Lesezeichenleiste eingeblendet ist. Öffne danach die lokale Installer-Datei erneut und ziehe den Button noch einmal in die Leiste.
+
+### Muss der Bestands-Check dauerhaft laufen?
+
+Nein. Er prüft nur dann aktiv, wenn du auf **Bestand prüfen** klickst.
+
+### Ich möchte automatisch über Änderungen informiert werden
+
+Dann ist der [🤖 automatische Docker-Tracker](docker-tracker.md) die passende Variante.
