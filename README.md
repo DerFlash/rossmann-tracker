@@ -12,6 +12,8 @@ Rossmann-Bestände einfach prüfen: **spontan per Browser-Check** oder **automat
 > [!IMPORTANT]
 > Angezeigte Werte sind Buchbestände und können vom tatsächlichen Regalbestand abweichen. Das Projekt ist unabhängig von der Dirk Rossmann GmbH und wird von ihr weder angeboten noch unterstützt.
 
+---
+
 ## 🚀 Start hier
 
 ### ⚡ 1. Aktiver Bestands-Check – am einfachsten zum Ausprobieren
@@ -25,6 +27,8 @@ Kein Docker, kein GitHub-Login und keine Kommandozeile: Ein kleines **Bookmarkle
 3. Den neuen Favoriten anklicken, PLZ prüfen und **Bestand prüfen** wählen.
 
 ➡️ **[Bebilderte Schritt-für-Schritt-Anleitung zum aktiven Bestands-Check](docs/bookmarklet.md)**
+
+---
 
 ### 🤖 2. Automatischer Tracker – überwacht für dich
 
@@ -44,6 +48,8 @@ Er läuft lokal auf deinem Rechner oder Server, speichert Bestandsverläufe und 
 | Bestandsänderungen und Verlauf sehen | **🤖 Automatischer Tracker** |
 | Telegram-Benachrichtigungen erhalten | **🤖 Automatischer Tracker** |
 
+---
+
 ## Funktionen
 
 ### Aktiver Bestands-Check
@@ -62,6 +68,8 @@ Er läuft lokal auf deinem Rechner oder Server, speichert Bestandsverläufe und 
 - lokale Weboberfläche für Einrichtung, Konfiguration, Status und Logs
 - Telegram-Steuerung per Slash-Commands
 - persistente Einstellungen und Bestände über Container-Neustarts hinweg
+
+---
 
 ## Dokumentation
 
@@ -88,6 +96,8 @@ git clone https://github.com/Level42-dev/rossmann-tracker.git
 
 ➡️ [Quellinstallation und technische Betriebsdetails](docs/docker-tracker.md#installation-aus-dem-quellcode)
 
+---
+
 ## Projekt und Unterstützung
 
 Mehr zum inoffiziellen und nichtkommerziellen Charakter des Projekts steht auf der Seite [Über den Rossmann Store Tracker](docs/about.md). Die geplanten Schritte bis zur öffentlichen Bereitstellung sind im [Veröffentlichungsfahrplan](ROADMAP.md) festgehalten.
@@ -99,6 +109,8 @@ Dieses rein private Hobbyprojekt wird kostenlos und nichtkommerziell bereitgeste
 Der Rossmann Store Tracker ist **source-available und kein klassisches Open-Source-Projekt**. Die unveränderte offizielle Version darf nach PolyForm Strict 1.0.0 für nichtkommerzielle Zwecke verwendet werden; die zusätzliche Projekterlaubnis gestattet private, nichtkommerzielle Veränderungen ausschließlich für den eigenen Gebrauch. Eigenständige Veröffentlichungen, Releases, Pakete, Container-Images und gehostete Varianten durch Dritte werden nicht zusätzlich erlaubt. GitHubs Nutzungsbedingungen räumen bei öffentlichen Repositorys unabhängig davon Plattformrechte zum Ansehen und Forken innerhalb GitHubs ein; weitergehende Nutzung richtet sich nach [`LICENSE.md`](LICENSE.md).
 
 Maßgeblich sind [`LICENSE.md`](LICENSE.md) und [`CONTRIBUTING.md`](CONTRIBUTING.md). Pull Requests erfordern die ausdrückliche Zustimmung zum [`Contributor Grant`](CONTRIBUTOR_LICENSE_AGREEMENT.md). Der dokumentierte [Best-Effort-Veröffentlichungscheck](docs/legal-review.md) ist keine Rechtsberatung oder externe juristische Freigabe und nennt die verbleibenden Risiken und offenen Freigabepunkte.
+
+---
 
 ## Projektstruktur
 
