@@ -21,7 +21,7 @@ jobs:
           const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
           const pullRequest = event.pull_request;
 
-          if (pullRequest.author_association === "OWNER") {
+          if (pullRequest.user?.login?.toLowerCase() === "derflash") {
             console.log("Beitrag des Rechteinhabers; kein zusätzlicher Contributor Grant erforderlich.");
             process.exit(0);
           }

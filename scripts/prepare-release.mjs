@@ -4,8 +4,9 @@ import { pathToFileURL } from "node:url";
 const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 const OWNER_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
-const OFFICIAL_OWNER = "DerFlash";
-export const OFFICIAL_REPOSITORY = "DerFlash/rossmann-tracker";
+const OFFICIAL_OWNER = "Level42-dev";
+export const OFFICIAL_RELEASE_ACTOR = "DerFlash";
+export const OFFICIAL_REPOSITORY = "Level42-dev/rossmann-tracker";
 
 export function compareStableVersions(left, right) {
   if (!SEMVER_PATTERN.test(left) || !SEMVER_PATTERN.test(right)) {
@@ -64,12 +65,12 @@ export function prepareReleaseMetadata({
     throw new Error("GITHUB_REPOSITORY_OWNER ist ungültig.");
   }
   if (repositoryOwner !== OFFICIAL_OWNER || repository !== OFFICIAL_REPOSITORY) {
-    throw new Error("Stable-Releases sind nur im offiziellen DerFlash-Repository erlaubt.");
+    throw new Error("Stable-Releases sind nur im offiziellen Level42-dev-Repository erlaubt.");
   }
-  if (actor !== OFFICIAL_OWNER) {
+  if (actor !== OFFICIAL_RELEASE_ACTOR) {
     throw new Error("Stable-Releases dürfen ausschließlich durch DerFlash gestartet werden.");
   }
-  if (triggeringActor !== OFFICIAL_OWNER) {
+  if (triggeringActor !== OFFICIAL_RELEASE_ACTOR) {
     throw new Error("Stable-Release-Läufe dürfen ausschließlich durch DerFlash gestartet oder erneut ausgeführt werden.");
   }
 

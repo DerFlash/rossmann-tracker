@@ -2,8 +2,8 @@ import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export const UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1_000;
-const RELEASES_API_URL = "https://api.github.com/repos/DerFlash/rossmann-tracker/releases/latest";
-const RELEASES_WEB_PREFIX = "https://github.com/DerFlash/rossmann-tracker/releases/tag/";
+const RELEASES_API_URL = "https://api.github.com/repos/Level42-dev/rossmann-tracker/releases/latest";
+const RELEASES_WEB_PREFIX = "https://github.com/Level42-dev/rossmann-tracker/releases/tag/";
 const STABLE_VERSION_PATTERN = /^(?:v)?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 

@@ -31,7 +31,7 @@ ENV NODE_ENV=production \
 
 LABEL org.opencontainers.image.title="Rossmann Store Tracker" \
       org.opencontainers.image.description="Inoffizieller Community-Tracker für Rossmann-Filialbestände" \
-      org.opencontainers.image.source="https://github.com/DerFlash/rossmann-tracker" \
+      org.opencontainers.image.source="https://github.com/Level42-dev/rossmann-tracker" \
       org.opencontainers.image.version="${APP_VERSION}" \
       org.opencontainers.image.revision="${APP_REVISION}" \
       org.opencontainers.image.created="${APP_BUILD_DATE}"

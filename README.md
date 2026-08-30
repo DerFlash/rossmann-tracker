@@ -41,7 +41,7 @@ Voraussetzung ist Docker Compose 2.24 oder neuer, beispielsweise über Docker De
 mkdir -p rossmann-tracker
 cd rossmann-tracker
 curl -fL -o docker-compose.yml \
-  https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml
+  https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml
 docker compose up -d
 ```
 
@@ -50,20 +50,20 @@ docker compose up -d
 ```powershell
 New-Item -ItemType Directory -Force rossmann-tracker
 Set-Location rossmann-tracker
-Invoke-WebRequest -Uri "https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
+Invoke-WebRequest -Uri "https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
 docker compose up -d
 ```
 
 Danach die Weboberfläche unter <http://127.0.0.1:8787> öffnen. Die geführte Ersteinrichtung richtet auf Wunsch Telegram ein, wählt Filialen und aktiviert Produkte. Eine `.env`- oder `config.json`-Datei ist für neue Installationen nicht erforderlich.
 
-Compose lädt das öffentliche Image `ghcr.io/derflash/rossmann-tracker:stable` automatisch. Ein separates `docker pull` ist bei der Erstinstallation nicht nötig. Der Dienst ist ausschließlich an `127.0.0.1` gebunden; Einstellungen, Zustand und Browserprofil werden lokal in `data/` und `browser-data/` gespeichert.
+Compose lädt das öffentliche Image `ghcr.io/level42-dev/rossmann-tracker:stable` automatisch. Ein separates `docker pull` ist bei der Erstinstallation nicht nötig. Der Dienst ist ausschließlich an `127.0.0.1` gebunden; Einstellungen, Zustand und Browserprofil werden lokal in `data/` und `browser-data/` gespeichert.
 
 ## Installation aus dem Quellcode
 
 Wer den aktuellen Quellstand lokal bauen oder am Projekt entwickeln möchte, verwendet stattdessen die Compose-Datei aus dem Repository:
 
 ```bash
-git clone https://github.com/DerFlash/rossmann-tracker.git
+git clone https://github.com/Level42-dev/rossmann-tracker.git
 cd rossmann-tracker
 docker compose up -d --build
 docker compose logs -f tracker

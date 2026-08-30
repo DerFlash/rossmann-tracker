@@ -11,7 +11,7 @@ Der Tracker stellt seine Build-Metadaten ohne lokale Konfigurations- oder Nutzun
 ```json
 {
   "build": {
-    "version": "0.4.0",
+    "version": "0.4.1",
     "revision": "development",
     "builtAt": null,
     "channel": "stable"
@@ -62,8 +62,8 @@ Vor der Veröffentlichung muss die gewünschte Version in `tracker/package.json`
 Bei erfolgreicher Prüfung veröffentlicht der Workflow dasselbe Image für `linux/amd64` und `linux/arm64` unter:
 
 ```text
-ghcr.io/derflash/rossmann-tracker:<version>
-ghcr.io/derflash/rossmann-tracker:stable
+ghcr.io/level42-dev/rossmann-tracker:<version>
+ghcr.io/level42-dev/rossmann-tracker:stable
 ```
 
 Der konkrete Versionstag wird nicht wiederverwendet und muss strikt größer als alle bisherigen Stable-Releases sein. Das Image erhält zunächst die validierten Build-Metadaten und eine signierte GitHub-Attestation. Digest, beide Zielarchitekturen und die OCI-Metadaten werden geprüft. Erst wenn das Image außerdem ohne Anmeldung abrufbar ist, wird `stable` auf exakt dessen Digest weiterbewegt. Nach einer weiteren Registry-Prüfung erzeugt der Workflow das GitHub Release samt `docker-compose.yml`, `default.env.example` und `UPDATE.md`.
@@ -82,7 +82,7 @@ Für normale Nutzer ist die Release-Installation vorgesehen. Die veröffentlicht
 mkdir -p rossmann-tracker
 cd rossmann-tracker
 curl -fL -o docker-compose.yml \
-  https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml
+  https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml
 docker compose up -d
 ```
 
@@ -91,18 +91,18 @@ docker compose up -d
 ```powershell
 New-Item -ItemType Directory -Force rossmann-tracker
 Set-Location rossmann-tracker
-Invoke-WebRequest -Uri "https://github.com/DerFlash/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
+Invoke-WebRequest -Uri "https://github.com/Level42-dev/rossmann-tracker/releases/latest/download/docker-compose.yml" -OutFile "docker-compose.yml"
 docker compose up -d
 ```
 
-Compose lädt `ghcr.io/derflash/rossmann-tracker:stable` beim ersten Start automatisch. Ein separates `docker pull` ist nicht erforderlich. Die Weboberfläche ist danach unter <http://127.0.0.1:8787> erreichbar.
+Compose lädt `ghcr.io/level42-dev/rossmann-tracker:stable` beim ersten Start automatisch. Ein separates `docker pull` ist nicht erforderlich. Die Weboberfläche ist danach unter <http://127.0.0.1:8787> erreichbar.
 
-Die GHCR-Paketansicht kann zusätzlich einen von der Build-Attestation erzeugten Eintrag mit einem Namen wie `sha256-…` hervorheben. Dieser Eintrag dokumentiert die Build-Provenienz und ist kein unterstützter Laufzeittag. Für Installationen werden ausschließlich `stable` oder ein konkreter Versionstag wie `0.4.0` verwendet.
+Die GHCR-Paketansicht kann zusätzlich einen von der Build-Attestation erzeugten Eintrag mit einem Namen wie `sha256-…` hervorheben. Dieser Eintrag dokumentiert die Build-Provenienz und ist kein unterstützter Laufzeittag. Für Installationen werden ausschließlich `stable` oder ein konkreter Versionstag wie `0.4.1` verwendet.
 
 Wer eine Version unveränderlich festhalten möchte, lädt die optionale Release-Datei `default.env.example`, speichert sie als `.env` und setzt darin beispielsweise:
 
 ```text
-ROSSMANN_TRACKER_IMAGE=ghcr.io/derflash/rossmann-tracker:0.4.0
+ROSSMANN_TRACKER_IMAGE=ghcr.io/level42-dev/rossmann-tracker:0.4.1
 ```
 
 Vor einem Update wird der laufende Tracker gestoppt und über den netzwerkisolierten Compose-Dienst `backup` gesichert. Er liest die persistenten Verzeichnisse nur lesend und schreibt einen atomar fertiggestellten Snapshot samt Version und Schemastand nach `backups/`. Erst nach erfolgreicher Sicherung wird das neue Image geladen:

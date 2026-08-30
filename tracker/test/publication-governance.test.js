@@ -45,13 +45,14 @@ test("Lizenz- und Beitragsunterlagen bleiben vollständig gekoppelt", async () =
   assert.match(template, /stimme dem Contributor Grant[\s\S]*ausdrücklich zu/);
   assert.match(contributorWorkflow, /pull_request:/);
   assert.doesNotMatch(contributorWorkflow, /pull_request_target/);
-  assert.match(contributorWorkflow, /author_association[\s\S]*OWNER/);
+  assert.doesNotMatch(contributorWorkflow, /author_association/);
+  assert.match(contributorWorkflow, /pullRequest\.user\?\.login\?\.toLowerCase\(\) === "derflash"/);
   assert.match(security, /Private Vulnerability Reporting/);
   assert.match(conduct, /Regeln für die Zusammenarbeit/);
   assert.match(notices, /code, documentation, data, catalog content, assets/);
   assert.match(notices, /Microsoft Playwright/);
   assert.match(readme, /cd tracker[\s\S]*node \.\.\/scripts\/check-publication-hygiene\.mjs/);
-  assert.match(readme, /github\.com\/DerFlash\/rossmann-tracker\.git/);
+  assert.match(readme, /github\.com\/Level42-dev\/rossmann-tracker\.git/);
   assert.doesNotMatch(readme, /\/wiki/);
   assert.match(documentationIndex, /frühere GitHub-Wiki[\s\S]*nicht mehr als maßgebliche Dokumentationsquelle/);
   assert.match(publicationBoundary, /neutralen Root-Commit[\s\S]*PUBLICATION_BASE\.md/);
@@ -59,10 +60,11 @@ test("Lizenz- und Beitragsunterlagen bleiben vollständig gekoppelt", async () =
   assert.match(publicationBoundary, /Git-basierte Veröffentlichungshygiene muss vor dem Export laufen[\s\S]*git ls-files/);
   assert.match(dockerfile, /COPY LICENSE\.md THIRD_PARTY_NOTICES\.md \/app\//);
   assert.match(dockerfile, /COPY LICENSE\.md \/LICENSE\.md/);
-  assert.match(dockerfile, /github\.com\/DerFlash\/rossmann-tracker/);
+  assert.match(dockerfile, /github\.com\/Level42-dev\/rossmann-tracker/);
   assert.equal(JSON.parse(packageJson).name, "rossmann-store-tracker");
   assert.equal(JSON.parse(packageJson).license, "SEE LICENSE IN ../LICENSE.md");
-  assert.match(releasePreparation, /OFFICIAL_REPOSITORY = "DerFlash\/rossmann-tracker"/);
+  assert.match(releasePreparation, /OFFICIAL_REPOSITORY = "Level42-dev\/rossmann-tracker"/);
+  assert.match(releasePreparation, /OFFICIAL_RELEASE_ACTOR = "DerFlash"/);
   for (const [path, ignoreFile] of [[".gitignore", gitignore], [".dockerignore", dockerignore]]) {
     assert.match(ignoreFile, /^\.env$/m, `${path}: .env fehlt`);
     assert.match(ignoreFile, /^\.env\.\*$/m, `${path}: .env.* fehlt`);

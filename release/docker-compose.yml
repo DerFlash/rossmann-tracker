@@ -1,6 +1,6 @@
 services:
   tracker:
-    image: "${ROSSMANN_TRACKER_IMAGE:-ghcr.io/derflash/rossmann-tracker:stable}"
+    image: "${ROSSMANN_TRACKER_IMAGE:-ghcr.io/level42-dev/rossmann-tracker:stable}"
     container_name: rossmann-store-tracker
     restart: unless-stopped
     init: true
@@ -33,7 +33,7 @@ services:
 
   backup:
     profiles: ["tools"]
-    image: "${ROSSMANN_TRACKER_IMAGE:-ghcr.io/derflash/rossmann-tracker:stable}"
+    image: "${ROSSMANN_TRACKER_IMAGE:-ghcr.io/level42-dev/rossmann-tracker:stable}"
     init: true
     read_only: true
     security_opt:
