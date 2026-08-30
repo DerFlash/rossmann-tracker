@@ -1,6 +1,6 @@
 # 🤖 Automatischer Tracker
 
-Der **automatische Tracker** ist für die dauerhafte Überwachung gedacht. Er prüft ausgewählte Rossmann-Produkte und Filialen regelmäßig, speichert Bestandsänderungen lokal und meldet gewünschte Änderungen per Telegram.
+Der automatische **Rossmann Store Tracker** ist für die dauerhafte Überwachung gedacht. Er prüft ausgewählte Rossmann-Produkte und Filialen regelmäßig, speichert Bestandsänderungen lokal und meldet gewünschte Änderungen per Telegram.
 
 Wenn du nur spontan nach einem Bestand schauen möchtest, starte stattdessen mit dem [⚡ aktiven Bestands-Check](bookmarklet.md).
 
