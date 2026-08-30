@@ -21,7 +21,7 @@ async function fixture({ currentVersion = "0.4.0", response, now = Date.parse("2
             tag_name: "v0.5.0",
             name: "Version 0.5.0",
             body: "## Sicherheit\nBehebt GHSA-abcd-1234-efgh.",
-            html_url: "https://github.com/DerFlash/rossmann-tracker/releases/tag/v0.5.0",
+            html_url: "https://github.com/Level42-dev/rossmann-tracker/releases/tag/v0.5.0",
             published_at: "2026-08-28T10:00:00Z",
             draft: false,
             prerelease: false,
@@ -73,7 +73,7 @@ test("Stable-Releases ohne v-Präfix werden erkannt und aus dem Cache geladen", 
         tag_name: "0.5.0",
         name: "Version 0.5.0",
         body: "",
-        html_url: "https://github.com/DerFlash/rossmann-tracker/releases/tag/0.5.0",
+        html_url: "https://github.com/Level42-dev/rossmann-tracker/releases/tag/0.5.0",
         published_at: "2026-08-28T10:00:00Z",
         draft: false,
         prerelease: false,
@@ -88,7 +88,7 @@ test("Stable-Releases ohne v-Präfix werden erkannt und aus dem Cache geladen", 
     cachePath: path.join(directory, "update-check.json"),
   });
   await reloaded.initialize(true);
-  assert.equal(reloaded.status().release.url, "https://github.com/DerFlash/rossmann-tracker/releases/tag/0.5.0");
+  assert.equal(reloaded.status().release.url, "https://github.com/Level42-dev/rossmann-tracker/releases/tag/0.5.0");
 });
 
 test("innerhalb von 24 Stunden erfolgt auch nach einem Fehler kein weiterer Abruf", async () => {
@@ -142,14 +142,14 @@ test("Prereleases und fremde Release-URLs werden nicht angeboten", async () => {
   for (const override of [
     { prerelease: true },
     { html_url: "https://example.test/releases/tag/v0.5.0" },
-    { tag_name: "v0.5.0-beta.1", html_url: "https://github.com/DerFlash/rossmann-tracker/releases/tag/v0.5.0-beta.1" },
+    { tag_name: "v0.5.0-beta.1", html_url: "https://github.com/Level42-dev/rossmann-tracker/releases/tag/v0.5.0-beta.1" },
   ]) {
     const { checker } = await fixture({ response: {
       ok: true,
       async json() {
         return {
           tag_name: "v0.5.0",
-          html_url: "https://github.com/DerFlash/rossmann-tracker/releases/tag/v0.5.0",
+          html_url: "https://github.com/Level42-dev/rossmann-tracker/releases/tag/v0.5.0",
           published_at: "2026-08-28T10:00:00Z",
           draft: false,
           prerelease: false,
