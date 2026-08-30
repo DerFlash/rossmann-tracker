@@ -104,7 +104,7 @@ for (const key of ["searchAreas", "stores", "products"]) {
 }
 
 const readme = readFileSync(new URL("README.md", repositoryRoot), "utf8");
-if (!readme.includes("github.com/DerFlash/rossmann-tracker.git")) {
+if (!readme.includes("github.com/Level42-dev/rossmann-tracker.git")) {
   findings.push("README.md: öffentliche Clone-Zielkennung fehlt");
 }
 if (!readme.includes("docs/docker-tracker.md") || readme.includes("/wiki")) {
@@ -112,7 +112,7 @@ if (!readme.includes("docs/docker-tracker.md") || readme.includes("/wiki")) {
 }
 
 const releasePreparation = readFileSync(new URL("scripts/prepare-release.mjs", repositoryRoot), "utf8");
-if (!releasePreparation.includes('OFFICIAL_REPOSITORY = "DerFlash/rossmann-tracker"')) {
+if (!releasePreparation.includes('OFFICIAL_REPOSITORY = "Level42-dev/rossmann-tracker"')) {
   findings.push("scripts/prepare-release.mjs: Stable-Release ist nicht auf das öffentliche Zielrepository begrenzt");
 }
 
