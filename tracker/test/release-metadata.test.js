@@ -28,15 +28,15 @@ test("Release-Metadaten sind stabil, validiert und registry-tauglich", () => {
     lockVersion: "1.2.3",
     ref: "refs/heads/main",
     revision: "0123456789abcdef0123456789abcdef01234567",
-    repositoryOwner: "DerFlash",
-    repository: "DerFlash/rossmann-tracker",
+    repositoryOwner: "Level42-dev",
+    repository: "Level42-dev/rossmann-tracker",
     actor: "DerFlash",
     triggeringActor: "DerFlash",
     buildDate: "2026-08-28T10:00:00+02:00",
   }), {
     version: "1.2.3",
     tag: "v1.2.3",
-    image: "ghcr.io/derflash/rossmann-tracker",
+    image: "ghcr.io/level42-dev/rossmann-tracker",
     revision: "0123456789abcdef0123456789abcdef01234567",
     builtAt: "2026-08-28T08:00:00.000Z",
   });
@@ -48,8 +48,8 @@ test("Release-Metadaten weisen unsichere oder inkonsistente Eingaben ab", () => 
     lockVersion: "1.2.3",
     ref: "refs/heads/main",
     revision: "0123456789abcdef0123456789abcdef01234567",
-    repositoryOwner: "DerFlash",
-    repository: "DerFlash/rossmann-tracker",
+    repositoryOwner: "Level42-dev",
+    repository: "Level42-dev/rossmann-tracker",
     actor: "DerFlash",
     triggeringActor: "DerFlash",
     buildDate: "2026-08-28T08:00:00Z",
@@ -61,7 +61,7 @@ test("Release-Metadaten weisen unsichere oder inkonsistente Eingaben ab", () => 
   assert.throws(() => prepareReleaseMetadata({ ...valid, revision: "kurz" }), /vollständige Git-Revision/);
   assert.throws(() => prepareReleaseMetadata({ ...valid, repositoryOwner: "owner/name" }), /OWNER/);
   assert.throws(() => prepareReleaseMetadata({ ...valid, repositoryOwner: "ForkOwner", repository: "ForkOwner/tracker" }), /offiziellen/);
-  assert.throws(() => prepareReleaseMetadata({ ...valid, repository: "DerFlash/anderes-projekt" }), /offiziellen/);
+  assert.throws(() => prepareReleaseMetadata({ ...valid, repository: "Level42-dev/anderes-projekt" }), /offiziellen/);
   assert.throws(() => prepareReleaseMetadata({ ...valid, actor: "Contributor" }), /DerFlash gestartet/);
   assert.throws(() => prepareReleaseMetadata({ ...valid, triggeringActor: "Contributor" }), /erneut ausgeführt/);
   assert.throws(() => prepareReleaseMetadata({ ...valid, buildDate: "gestern" }), /BUILD_DATE/);
@@ -86,11 +86,11 @@ test("Stable-Versionen steigen strikt monoton", () => {
 test("GitHub-Releasezustand wird vollständig und fehlersicher geprüft", async () => {
   const revision = "0123456789abcdef0123456789abcdef01234567";
   const responses = new Map([
-    ["/repos/DerFlash/rossmann-tracker", [200, { visibility: "public" }]],
-    ["/repos/DerFlash/rossmann-tracker/branches/main", [200, { commit: { sha: revision } }]],
-    ["/repos/DerFlash/rossmann-tracker/releases?per_page=100&page=1", [200, []]],
-    ["/repos/DerFlash/rossmann-tracker/releases/tags/v0.4.0", [404, { message: "Not Found" }]],
-    ["/repos/DerFlash/rossmann-tracker/git/ref/tags/v0.4.0", [404, { message: "Not Found" }]],
+    ["/repos/Level42-dev/rossmann-tracker", [200, { visibility: "public" }]],
+    ["/repos/Level42-dev/rossmann-tracker/branches/main", [200, { commit: { sha: revision } }]],
+    ["/repos/Level42-dev/rossmann-tracker/releases?per_page=100&page=1", [200, []]],
+    ["/repos/Level42-dev/rossmann-tracker/releases/tags/v0.4.0", [404, { message: "Not Found" }]],
+    ["/repos/Level42-dev/rossmann-tracker/git/ref/tags/v0.4.0", [404, { message: "Not Found" }]],
   ]);
   const fetchImpl = async (url) => {
     const parsedUrl = new URL(url);
@@ -101,8 +101,8 @@ test("GitHub-Releasezustand wird vollständig und fehlersicher geprüft", async 
   };
   const input = {
     token: "test-token",
-    repository: "DerFlash/rossmann-tracker",
-    repositoryOwner: "DerFlash",
+    repository: "Level42-dev/rossmann-tracker",
+    repositoryOwner: "Level42-dev",
     actor: "DerFlash",
     triggeringActor: "DerFlash",
     revision,
@@ -113,11 +113,11 @@ test("GitHub-Releasezustand wird vollständig und fehlersicher geprüft", async 
 
   assert.deepEqual(await checkReleaseState(input), { releasesChecked: 0 });
   await assert.rejects(
-    checkReleaseState({ ...input, repository: "DerFlash/anderes-projekt" }),
+    checkReleaseState({ ...input, repository: "Level42-dev/anderes-projekt" }),
     /offiziellen/,
   );
 
-  responses.set("/repos/DerFlash/rossmann-tracker/releases/tags/v0.4.0", [500, { message: "API failure" }]);
+  responses.set("/repos/Level42-dev/rossmann-tracker/releases/tags/v0.4.0", [500, { message: "API failure" }]);
   await assert.rejects(checkReleaseState(input), /API failure/);
 });
 
