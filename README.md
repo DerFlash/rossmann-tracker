@@ -14,6 +14,10 @@ Rossmann-Bestände einfach prüfen: **spontan per Browser-Check** oder **automat
 
 ---
 
+![Flyer](docs/assets/flyer.png "Rossmann Tracker")
+
+---
+
 ## 🚀 Start hier
 
 ### ⚡ 1. Aktiver Bestands-Check – am einfachsten zum Ausprobieren
