@@ -8,9 +8,14 @@ Wenn du nur spontan nach einem Bestand schauen möchtest, starte stattdessen mit
 
 Für die empfohlene Installation benötigst du nur:
 
-- **Docker Desktop** oder Docker Engine mit Docker Compose **2.24 oder neuer**,
+- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** oder Docker Engine mit Docker Compose **2.24 oder neuer**,
 - einen Browser für die lokale Weboberfläche,
 - einen eigenen **Telegram-Bot** für die geführte Ersteinrichtung.
+
+> [!TIP]
+> **Noch nie Docker benutzt?** Docker Desktop ist die Anwendung, die den Tracker auf deinem Rechner startet und im Hintergrund laufen lässt. Für Windows und macOS ist sie der einfachste Einstieg. Lade Docker Desktop von der offiziellen Docker-Seite herunter, installiere es und starte die Anwendung einmal, bevor du mit dem Tracker weitermachst.
+>
+> ➡️ **[Docker Desktop offiziell herunterladen](https://www.docker.com/products/docker-desktop/)**
 
 Git, Node.js und ein GitHub-Login sind für den normalen Release-Weg **nicht erforderlich**.
 
@@ -20,7 +25,7 @@ Das veröffentlichte Image unterstützt `linux/amd64` und `linux/arm64`.
 
 ![Docker-Tracker starten](assets/tracker-start.svg)
 
-Installiere und starte zunächst Docker Desktop. Öffne danach ein Terminal.
+Installiere und starte zunächst **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**. Öffne danach ein Terminal.
 
 ### macOS und Linux
 

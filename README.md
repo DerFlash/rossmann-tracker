@@ -34,7 +34,7 @@ Kein Docker, kein GitHub-Login und keine Kommandozeile: Ein kleines **Bookmarkle
 
 **Du möchtest ausgewählte Produkte und Filialen regelmäßig überwachen und bei Änderungen benachrichtigt werden? Dann ist der Docker-Tracker die richtige Variante.**
 
-Er läuft lokal auf deinem Rechner oder Server, speichert Bestandsverläufe und kann Restocks, Ausverkäufe und andere Änderungen per Telegram melden. Für die normale Installation brauchst du im Wesentlichen **Docker Desktop / Docker Compose**; Git und Node.js sind nicht erforderlich.
+Er läuft lokal auf deinem Rechner oder Server, speichert Bestandsverläufe und kann Restocks, Ausverkäufe und andere Änderungen per Telegram melden. Für die normale Installation brauchst du im Wesentlichen **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**; Git und Node.js sind nicht erforderlich. Docker Desktop ist die Anwendung, die den Tracker auf deinem Rechner startet und im Hintergrund laufen lässt.
 
 ➡️ **[Bebilderte Installation und Ersteinrichtung des automatischen Trackers](docs/docker-tracker.md)**
 
